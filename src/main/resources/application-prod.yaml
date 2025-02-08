@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: ${JDBC_DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASS}
+logging:
+  level:
+    org.springframework.web: "warn"
+    org.hibernate: "warn"
