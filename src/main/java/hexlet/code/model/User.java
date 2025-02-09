@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -24,7 +25,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 @EntityListeners(AuditingEntityListener.class)
-@AllArgsConstructor
 @Getter
 @Setter
 @Entity
@@ -37,10 +37,10 @@ public class User {
     @EqualsAndHashCode.Include
     private long id;
 
-    @NotEmpty
+    @NotBlank
     @ToString.Include
     private String firstName;
-    @NotEmpty
+
     @ToString.Include
     private String lastName;
 
