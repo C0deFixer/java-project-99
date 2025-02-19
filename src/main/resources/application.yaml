@@ -8,5 +8,11 @@ spring:
     hibernate:
       ddl-auto: update
     defer-datasource-initialization: true
+    properties:
+      hibernate:
+        dialect: "org.hibernate.dialect.PostgreSQLDialect"
   profiles:
-    default: "dev"
+    default: "prod"
+rsa:
+  private-key: classpath:certs/private.pem
+  public-key: classpath:certs/public.pem

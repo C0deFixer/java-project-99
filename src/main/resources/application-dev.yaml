@@ -7,7 +7,12 @@ spring:
       path: /h2-console
       settings.trace: false
       settings.web-allow-others: false
+  jpa:
+    properties:
+      hibernate:
+        format_sql: true
 logging:
   level:
-    org.springframework.web: "warn"
-    org.hibernate: "warn"
+    org.springframework.web: debug
+    org.springframework.security: debug
+    org.hibernate: warn
