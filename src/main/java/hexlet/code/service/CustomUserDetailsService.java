@@ -52,7 +52,8 @@ public class CustomUserDetailsService implements UserDetailsManager {
     public void updateUser(UserDetails details) {
         User user = Optional.ofNullable(
                         userRepository.findByEmail(details.getUsername()))
-                .orElseThrow(() -> new ResourceNotFoundException("User with name " + details.getUsername() + " not found!"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("User with name " + details.getUsername() + " not found!"));
         user.setEmail(details.getUsername());
         //TODO update password with checking valid authorities
         //user.setPasswordDigest(passwordEncoder.encode(details.getPassword()));

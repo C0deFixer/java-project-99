@@ -2,6 +2,7 @@ package hexlet.code.controller.api;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import hexlet.code.dto.AuthRequest;
 import hexlet.code.dto.UserCreateDto;
 import hexlet.code.dto.UserDto;
 import hexlet.code.exception.ResourceNotFoundException;
@@ -19,6 +20,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -27,9 +29,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
@@ -70,6 +70,9 @@ public class UserControllerTest {
 
     @Autowired
     private Faker faker;
+
+    @Autowired
+    private JwtDecoder jwtDecoder;
 
     private SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor token;
     private User user1, user2;
@@ -192,19 +195,24 @@ public class UserControllerTest {
     @DisplayName("Test login")
     public void testLogin() throws Exception {
         User testUser = createUser();
-        Map<String, String> userDtoMap = new HashMap<>();
-        userDtoMap.put("username", testUser.getEmail());
-        userDtoMap.put("password", faker.internet().password());
-        testUser.setPasswordDigest(passwordEncoder.encode(userDtoMap.get("password")));
+        AuthRequest authRequest = new AuthRequest(testUser.getEmail(), faker.internet().password());
+        testUser.setPasswordDigest(passwordEncoder.encode(authRequest.getPassword()));
         userRepository.save(testUser);
         var request = post("/api/login")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(userDtoMap));
+                .content(om.writeValueAsString(authRequest));
         var result = mockMvc.perform(request).andExpect(status().isOk()).andReturn();
         String body = result.getResponse().getContentAsString();
-        assertThat(body).asBase64Decoded().isNotEmpty();
+        assertThat(jwtDecoder.decode(body).getClaims().get("sub")).isEqualTo(testUser.getEmail());
         //assertThat(body).asBase64Decoded().toString();
 
+    }
+
+    @Test
+    @DisplayName("Test fail login")
+    public void tesLoginFail() throws Exception {
+        var request = get("/api/users"); //jwt missed
+        var result = mockMvc.perform(request).andExpect(status().isUnauthorized()).andReturn();
     }
 
 }
