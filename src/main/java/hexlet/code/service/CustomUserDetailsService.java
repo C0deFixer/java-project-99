@@ -11,6 +11,7 @@ import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
 
 import jakarta.validation.Validator;
+
 import java.util.Optional;
 
 
@@ -26,9 +27,9 @@ public class CustomUserDetailsService implements UserDetailsManager {
     @Autowired
     private Validator validator;
 
-    public String encodePassword(String pass) {
-        return passwordEncoder.encode(pass);
-    }
+    //public String encodePassword(String pass) {
+    //    return passwordEncoder.encode(pass);
+    //}
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -40,17 +41,20 @@ public class CustomUserDetailsService implements UserDetailsManager {
     @Override
     public void createUser(UserDetails details) {
         User user = new User();
-        user.setFirstName("Unnamed");
-        var passHash = encodePassword(details.getPassword());
-        user.setPasswordDigest(passHash);
+        user.setFirstName("Unnamed"); //empty first name
+        user.setEmail(details.getUsername());
+        var hashedPassword = passwordEncoder.encode(details.getPassword());
+        user.setPasswordDigest(hashedPassword);
         userRepository.save(user);
     }
 
     @Override
     public void updateUser(UserDetails details) {
-        User user = Optional.ofNullable(userRepository.findByEmail(details.getUsername()))
+        User user = Optional.ofNullable(
+                        userRepository.findByEmail(details.getUsername()))
                 .orElseThrow(() -> new ResourceNotFoundException("User with name " + details.getUsername() + " not found!"));
         user.setEmail(details.getUsername());
+        //TODO update password with checking valid authorities
         //user.setPasswordDigest(passwordEncoder.encode(details.getPassword()));
         userRepository.save(user);
     }

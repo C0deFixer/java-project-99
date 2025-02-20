@@ -22,7 +22,7 @@ public class DataInitializer implements ApplicationRunner {
         String email = "hexlet@example.com";
         if (userRepository.findByEmail(email) != null) {
             return;
-        };
+        }
         User admin = new User();
         admin.setEmail(email);
         admin.setPasswordDigest(passwordEncoder.encode("qwerty"));

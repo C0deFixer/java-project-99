@@ -9,7 +9,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -38,7 +37,6 @@ public class User implements UserDetails, BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @NotBlank
     @ToString.Include
     private String firstName;
 
@@ -50,13 +48,13 @@ public class User implements UserDetails, BaseEntity {
     @Column(unique = true)
     private String email;
 
-    private String passwordDigest;;
+    private String passwordDigest;
 
     @CreatedDate
-    LocalDateTime createdAt;
+    private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    LocalDateTime updatedAt;
+    private LocalDateTime updatedAt;
 
     public User() {
     }

@@ -63,7 +63,7 @@ public class UserController {
     @ResponseStatus(HttpStatus.CREATED)
     public UserDto create(@Valid @RequestBody UserCreateDto userCreateDto) {
         User user = mapper.map(userCreateDto);
-        if(userRepository.findByEmail(user.getEmail()) != null) {
+        if (userRepository.findByEmail(user.getEmail()) != null) {
             //TODO throw correct exception
             throw new ResourceNotFoundException("User with e-mail " + user.getEmail() + " exist already!");
         }

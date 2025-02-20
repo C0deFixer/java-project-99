@@ -12,6 +12,6 @@ public class UserUpdateDto {
     @NotNull
     private JsonNullable<String> firstName;
     @NotNull
-    private JsonNullable<String>  lastName;
+    private JsonNullable<String> lastName;
 
 }
