@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,6 +41,9 @@ public class UserController {
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @ResponseStatus(HttpStatus.OK)
     @GetMapping()
     public ResponseEntity<List<UserDto>> index() {
@@ -67,6 +71,7 @@ public class UserController {
             //TODO throw correct exception
             throw new ResourceNotFoundException("User with e-mail " + user.getEmail() + " exist already!");
         }
+        //Password Digest already mapped through encoder
         user = userRepository.save(user);
         UserDto userDto = mapper.map(user);
         return userDto;

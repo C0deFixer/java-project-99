@@ -1,0 +1,7 @@
+[
+  {"name": "draft", "slug": "draft"},
+  {"name": "to_be_fixed", "slug": "to_be_fixed"},
+  {"name": "to_publish", "slug": "to_publish"},
+  {"name": "to_review", "slug": "to_review"},
+  {"name": "published", "slug": "published"}
+]

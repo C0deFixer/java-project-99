@@ -1,6 +1,7 @@
 package hexlet.code.util;
 
 import hexlet.code.dto.UserCreateDto;
+import hexlet.code.model.TaskStatus;
 import hexlet.code.model.User;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
@@ -22,6 +23,8 @@ public class ModelGenerator {
 
     private Model<UserCreateDto> userCreateDtoModel;
 
+    private Model<TaskStatus> taskStatusModel;
+
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -41,6 +44,11 @@ public class ModelGenerator {
                 .supply(Select.field(UserCreateDto::getFirstName), () -> faker.name().firstName())
                 .supply(Select.field(UserCreateDto::getLastName), () -> faker.name().lastName())
                 .supply(Select.field(UserCreateDto::getPassword), () -> faker.internet().password())
+                .toModel();
+
+        taskStatusModel = Instancio.of(TaskStatus.class)
+                .ignore(Select.field(TaskStatus::getId))
+                .supply(Select.field(TaskStatus::getName), () -> faker.job().position())
                 .toModel();
     }
 }

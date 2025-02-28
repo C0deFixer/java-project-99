@@ -17,4 +17,5 @@ public class JacsonConfig {
                 .modulesToInstall(new JsonNullableModule());
         return builder;
     }
+
 }
