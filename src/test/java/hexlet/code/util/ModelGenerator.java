@@ -1,6 +1,7 @@
 package hexlet.code.util;
 
 import hexlet.code.dto.UserCreateDto;
+import hexlet.code.model.Task;
 import hexlet.code.model.TaskStatus;
 import hexlet.code.model.User;
 import jakarta.annotation.PostConstruct;
@@ -25,6 +26,8 @@ public class ModelGenerator {
 
     private Model<TaskStatus> taskStatusModel;
 
+    private Model<Task> taskModel;
+
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -33,7 +36,9 @@ public class ModelGenerator {
 
         userModel = Instancio.of(User.class)
                 .ignore(Select.field(User::getId))
-                //.ignore(Select.field(User::getPosts))
+                .ignore(Select.field(User::getTaskList))
+                .ignore(Select.field(User::getCreatedAt))
+                .ignore(Select.field(User::getUpdatedAt))
                 .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
                 //.supply(Select.field(User::getPassword), () -> faker.internet().password())
                 .supply(Select.field(User::getPasswordDigest), () -> passwordEncoder.encode(faker.internet().password()))
@@ -48,7 +53,18 @@ public class ModelGenerator {
 
         taskStatusModel = Instancio.of(TaskStatus.class)
                 .ignore(Select.field(TaskStatus::getId))
+                .ignore(Select.field(TaskStatus::getTasks))
+                .ignore(Select.field(TaskStatus::getCreatedAt))
                 .supply(Select.field(TaskStatus::getName), () -> faker.job().position())
+                .toModel();
+
+        taskModel = Instancio.of(Task.class)
+                .ignore(Select.field(Task::getId))
+                .ignore(Select.field(Task::getAssignee))
+                .ignore(Select.field(Task::getTaskStatus))
+                .ignore(Select.field(Task::getCreatedAt))
+                .supply(Select.field(Task::getName), () -> faker.name().title())
+                .supply(Select.field(Task::getDescription), () -> faker.text().text(50))
                 .toModel();
     }
 }
