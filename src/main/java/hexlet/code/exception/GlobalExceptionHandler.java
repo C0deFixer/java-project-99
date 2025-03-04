@@ -18,11 +18,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ConstraintDeclarationException.class)
     public ResponseEntity<String> handle(ConstraintDeclarationException exception) {
+        logger.debug("ConstraintDeclarationException happen");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<String> handle(DataIntegrityViolationException exception) {
+        logger.debug("DataIntegrityViolationException happen");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
     }
 

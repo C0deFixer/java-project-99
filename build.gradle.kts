@@ -39,6 +39,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5")
 
 	annotationProcessor("org.projectlombok:lombok:1.18.36") //order is important lombok should be before MapStruct
 	compileOnly("org.projectlombok:lombok:1.18.36")
@@ -58,6 +59,7 @@ dependencies {
 	runtimeOnly("org.postgresql:postgresql")
 	testCompileOnly("org.projectlombok:lombok:1.18.36")
 	testAnnotationProcessor("org.projectlombok:lombok:1.18.36")
+	testAnnotationProcessor("org.mapstruct:mapstruct-processor:1.6.0.Beta1")
 	testImplementation(platform("org.junit:junit-bom:5.10.0"))
 	testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")

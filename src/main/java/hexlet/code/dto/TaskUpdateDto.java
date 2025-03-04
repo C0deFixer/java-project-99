@@ -4,17 +4,21 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import org.openapitools.jackson.nullable.JsonNullable;
+
+import java.util.List;
 
 @Getter
 @Setter
 public class TaskUpdateDto {
-    private Integer index;
+    private JsonNullable<Integer> index;
     @Size(min = 1)
-    private String name;
+    private JsonNullable<String> name;
     //@NotBlank
-    private String description;
+    private JsonNullable<String> description;
     @NotNull
-    private Long taskStatusId;
-    private Long assigneeId;
+    private JsonNullable<Long> taskStatusId;
+    private JsonNullable<Long> assigneeId;
+    private JsonNullable<List<Long>> labelsId;
 
 }

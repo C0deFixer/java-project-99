@@ -1,6 +1,7 @@
 package hexlet.code.util;
 
 import hexlet.code.dto.UserCreateDto;
+import hexlet.code.model.Label;
 import hexlet.code.model.Task;
 import hexlet.code.model.TaskStatus;
 import hexlet.code.model.User;
@@ -27,6 +28,8 @@ public class ModelGenerator {
     private Model<TaskStatus> taskStatusModel;
 
     private Model<Task> taskModel;
+
+    private Model<Label> labelModel;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -62,9 +65,17 @@ public class ModelGenerator {
                 .ignore(Select.field(Task::getId))
                 .ignore(Select.field(Task::getAssignee))
                 .ignore(Select.field(Task::getTaskStatus))
+                .ignore(Select.field(Task::getLabels))
                 .ignore(Select.field(Task::getCreatedAt))
                 .supply(Select.field(Task::getName), () -> faker.name().title())
                 .supply(Select.field(Task::getDescription), () -> faker.text().text(50))
                 .toModel();
+
+        labelModel = Instancio.of(Label.class)
+                .ignore(Select.field(Label::getId))
+                .ignore(Select.field(Label::getTasks))
+                .supply(Select.field(Label::getName), () -> faker.name().title())
+                .toModel();
+
     }
 }
