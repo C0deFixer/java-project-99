@@ -26,8 +26,8 @@ import java.util.Objects;
 import java.util.Set;
 
 @Mapper(uses = {JsonNullableMapper.class, ReferenceMapper.class},
-        componentModel = MappingConstants.ComponentModel.SPRING,
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
+        componentModel = MappingConstants.ComponentModel.SPRING,
         unmappedTargetPolicy = ReportingPolicy.IGNORE
 )
 public abstract class TaskMapper {
@@ -41,13 +41,12 @@ public abstract class TaskMapper {
     @Autowired
     private LabelRepository labelRepository;
 
-
-    @Mapping(source = "assigneeId", target = "assignee.id")
-    @Mapping(source = "taskStatusId", target = "taskStatus.id")
+    @Mapping(source = "assigneeId", target = "assignee")
+    @Mapping(source = "taskStatusId", target = "taskStatus")
     @Mapping(target = "labels", source = "labels", qualifiedByName = "getLabelsById")
     public abstract Task map(TaskCreateDto dto);
 
-    @Mapping(source = "assigneeId", target = "assignee.id")
+    @Mapping(source = "assigneeId", target = "assignee")
     @Mapping(source = "taskStatusId", target = "taskStatus.id")
     @Mapping(target = "labels", source = "labels", qualifiedByName = "getLabelsById")
     public abstract Task map(TaskDto taskDto);

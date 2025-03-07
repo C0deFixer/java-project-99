@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class LabelDto {
+    private Long id;
     private String name;
     private LocalDateTime createdAt;
 

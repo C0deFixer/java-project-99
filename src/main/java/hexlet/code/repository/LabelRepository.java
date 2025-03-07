@@ -12,11 +12,5 @@ import java.util.Set;
 public interface LabelRepository extends JpaRepository<Label, Long> {
     public Optional<Label> findByName(String name);
 
-    //public List<Label> findAllById(Iterable<Label>){};Set
     public Set<Label> findAllByIdIn(List<Long> ids);
-/*    @Query("SELECT FROM labels WHERE id in :")
-    default public List<Label> fingAllById(List<Long> list) {
-        return new ArrayList<Label>() {
-        };
-    };*/
 }

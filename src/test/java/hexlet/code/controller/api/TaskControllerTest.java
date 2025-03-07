@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hexlet.code.dto.TaskDto;
+import hexlet.code.mapper.LabelMapper;
 import hexlet.code.mapper.TaskMapper;
 import hexlet.code.model.Label;
 import hexlet.code.model.Task;
@@ -91,6 +92,8 @@ public class TaskControllerTest {
     private List<Label> testLabels;
 
     private JwtRequestPostProcessor token;
+    @Autowired
+    private LabelMapper labelMapper;
 
     private Task createTask() {
         Task taskTest = Instancio.of(modelGenerator.getTaskModel()).create();
@@ -164,13 +167,14 @@ public class TaskControllerTest {
     }
 
     @ParameterizedTest(name = "Test Task Show {index} - {0} case")
-    //@ValueSource(strings  = {"{\"assignee\":\"null\"}", "{\"label\":[]}" , "{\"assignee\":\"\"}, \"label\":\"\"}"})
-    @ValueSource(strings  = {"{\"assignee\":null}"})
+    @ValueSource(strings = {"{\"assignee\": null}", "{\"labels\":[]}", "{\"assignee\":}, \"labels\":}"})
+    //@ValueSource(strings  = {"{\"assignee\":null}"})
     //@ValueSource(strings  = {"{\"labels\":[]}"})
-            public void testShow(String argDto) throws Exception {
+    public void testShow(String argDto) throws Exception {
         om.configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, false);
         //Applying test argument to testTask Object through Dto mapping
-        Task testTask = createTask(om.readValue(argDto, new TypeReference<TaskTestDto>() {}));
+        Task testTask = createTask(om.readValue(argDto, new TypeReference<TaskTestDto>() {
+        }));
 
         var request = get("/api/tasks/" + testTask.getId())
                 .with(token);
@@ -184,30 +188,45 @@ public class TaskControllerTest {
                 v -> v.node("taskStatusId").isEqualTo(testTask.getTaskStatus().getId()));
     }
 
-    @Test
-    @DisplayName("Test Task Create")
-    public void testCreate() throws Exception {
+    @ParameterizedTest(name = "Test Task Create {index} - {0} case")
+    @ValueSource(strings = {"{\"assignee\": null}", "{\"labels\":[]}", "{}"})
+    public void testCreate(String argDto) throws Exception {
+
+        TaskTestDto testTaskDto = om.readValue(argDto, new TypeReference<TaskTestDto>() {
+        });
+
         Task testTask = Instancio.of(modelGenerator.getTaskModel()).create();
         testTask.setTaskStatus(testTaskStatus);
         testTask.setAssignee(testUser);
         testTask.addLabels(testLabels);
+        testMapper.apply(testTaskDto, testTask);
+        String requestBody = om.writeValueAsString(mapper.map(testTask));
         var request = post("/api/tasks")
                 .header("Content-Type", MediaType.APPLICATION_JSON)
                 .with(token)
-                .content(om.writeValueAsString(mapper.map(testTask)));
+                .content(requestBody);
+
+        List<Long> testLabelsId = testTask.getLabels().stream().map(Label::getId).toList();
 
         var responce = mvc.perform(request).andExpect(status().isCreated()).andReturn();
         String body = responce.getResponse().getContentAsString();
         assertThatJson(body).and(v -> v.node("index").isEqualTo(testTask.getIndex()),
-                v -> v.node("name").isEqualTo(testTask.getName()),
-                v -> v.node("description").isEqualTo(testTask.getDescription()),
-                v -> v.node("assigneeId").isEqualTo(testTask.getAssignee().getId()),
-                v -> v.node("taskStatusId").isEqualTo(testTask.getTaskStatus().getId()));
+                        v -> v.node("name").isEqualTo(testTask.getName()),
+                        v -> v.node("description").isEqualTo(testTask.getDescription()),
+                        v -> v.node("labels").isArray().containsExactlyInAnyOrderElementsOf(testLabelsId),
+                        v -> v.node("taskStatusId").isEqualTo(testTask.getTaskStatus().getId()))
+                .and(v -> {
+                    if (testTask.getAssignee() == null) {
+                        v.node("assigneeId").isAbsent();
+                    } else {
+                        v.node("assigneeId").isEqualTo(testTask.getAssignee().getId());
+                    }
+                });
     }
 
 
     @ParameterizedTest(name = "Test Task Show {index} - {0} ")
-    @ValueSource(strings = {"",""})
+    @ValueSource(strings = {"", ""})
     public void testUpdate(String testModelBody) throws Exception {
         Task testTask = createTask();
         User testUser1 = Instancio.of(modelGenerator.getUserModel()).create();
