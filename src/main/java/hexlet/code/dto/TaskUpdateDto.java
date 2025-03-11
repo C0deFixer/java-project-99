@@ -13,12 +13,12 @@ import java.util.List;
 public class TaskUpdateDto {
     private JsonNullable<Integer> index;
     @Size(min = 1)
-    private JsonNullable<String> name;
+    private JsonNullable<String> title;
     //@NotBlank
-    private JsonNullable<String> description;
+    private JsonNullable<String> content;
     @NotNull
-    private JsonNullable<Long> taskStatusId;
-    private JsonNullable<Long> assigneeId;
-    private JsonNullable<List<Long>> labelsId;
+    private JsonNullable<String> status;
+    private JsonNullable<Long> assignee_id;
+    private JsonNullable<List<Long>> taskLabelIds;
 
 }

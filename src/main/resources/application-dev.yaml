@@ -11,9 +11,14 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  sql:
+    init:
+      #schema-locations:
+      #data-locations: classpath:resources/data.sql
 logging:
   level:
     org.springframework.web: warn
     org.springframework.security: warn
     org.hibernate: debug
+    org.springframework.test.context.jdbc: debug # Test init sql data
 debug: true

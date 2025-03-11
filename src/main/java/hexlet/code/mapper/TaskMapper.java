@@ -41,36 +41,43 @@ public abstract class TaskMapper {
     @Autowired
     private LabelRepository labelRepository;
 
-    @Mapping(source = "assigneeId", target = "assignee")
-    @Mapping(source = "taskStatusId", target = "taskStatus")
-    @Mapping(target = "labels", source = "labels", qualifiedByName = "getLabelsById")
+    @Mapping(source = "assignee_id", target = "assignee")
+    @Mapping(source = "title", target = "name")
+    @Mapping(source = "content", target = "description")
+    @Mapping(source = "status", target = "taskStatus", qualifiedByName = "getTaskStatusBySlug")
+    @Mapping(target = "labels", source = "taskLabelIds", qualifiedByName = "getLabelsByIds")
     public abstract Task map(TaskCreateDto dto);
 
-    @Mapping(source = "assigneeId", target = "assignee")
-    @Mapping(source = "taskStatusId", target = "taskStatus.id")
-    @Mapping(target = "labels", source = "labels", qualifiedByName = "getLabelsById")
-    public abstract Task map(TaskDto taskDto);
-
-    @Mapping(source = "assignee.id", target = "assigneeId")
-    @Mapping(source = "taskStatus.id", target = "taskStatusId")
-    @Mapping(source = "labels", target = "labels", qualifiedByName = "setToListLabelsId")
+    @Mapping(source = "assignee.id", target = "assignee_id")
+    @Mapping(source = "name", target = "title")
+    @Mapping(source = "description", target = "content")
+    @Mapping(source = "taskStatus.name", target = "status")
+    @Mapping(source = "labels", target = "taskLabelIds", qualifiedByName = "setToListLabelsId")
     public abstract TaskDto map(Task task);
 
-    @Mapping(target = "assignee", source = "assigneeId", qualifiedByName = "getUserById")
-    @Mapping(target = "taskStatus", source = "taskStatusId", qualifiedByName = "getTaskStatusById")
-    @Mapping(target = "labels", source = "labelsId", qualifiedByName = "getLabelsById")
+    @Mapping(source = "assignee_id", target = "assignee")
+    @Mapping(source = "title", target = "name")
+    @Mapping(source = "content", target = "description")
+    @Mapping(source = "status", target = "taskStatus")
+    @Mapping(target = "labels", source = "taskLabelIds", qualifiedByName = "getLabelsByIds")
+    public abstract Task map(TaskDto taskDto);
+
+    //@Mapping(target = "assignee", source = "assignee_id", qualifiedByName = "getUserById")
+    @Mapping(target = "assignee", source = "assignee_id") //Reference mapper using
+    @Mapping(target = "taskStatus", source = "status", qualifiedByName = "getTaskStatusBySlug")
+    @Mapping(target = "labels", source = "taskLabelIds", qualifiedByName = "getLabelsByIds")
     public abstract void update(TaskUpdateDto dto, @MappingTarget Task model);
 
-    @Named("getUserById")
-    public User getUserById(Long id) {
-        if (id == null) {
-            return null;
-        } else {
-            return userRepository.findById(id)
-                    .orElseThrow(() ->
-                            new ResourceNotFoundException(String.format("User with id %s not found", id)));
-        }
-    }
+//    @Named("getUserById")
+//    public User getUserById(Long id) {
+//        if (id == null) {
+//            return null;
+//        } else {
+//            return userRepository.findById(id)
+//                    .orElseThrow(() ->
+//                            new ResourceNotFoundException(String.format("User with id %s not found", id)));
+//        }
+//    }
 
     @Named("setToListLabelsId")
     public List<Long> setToListLabelsId(Set<Label> set){
@@ -78,19 +85,19 @@ public abstract class TaskMapper {
     }
 
 
-    @Named("getTaskStatusById")
-    public TaskStatus getTaskStatusById(Long id) {
-        if (id == null) {
+    @Named("getTaskStatusBySlug")
+    public TaskStatus getTaskStatusBySlug(String slug) {
+        if (slug == null) {
             return null;
         } else {
-            return taskStatusRepository.findById(id)
+            return taskStatusRepository.findBySlug(slug)
                     .orElseThrow(() ->
-                            new ResourceNotFoundException(String.format("Task Status with id %s not found", id)));
+                            new ResourceNotFoundException(String.format("Task Status with slug %s not found", slug)));
         }
     }
 
-    @Named("getLabelsById")
-    public Set<Label> getLabelsById(List<Long> list) {
+    @Named("getLabelsByIds")
+    public Set<Label> getLabelsByIds(List<Long> list) {
         if (list == null) {
             return new HashSet<>();
         } else {

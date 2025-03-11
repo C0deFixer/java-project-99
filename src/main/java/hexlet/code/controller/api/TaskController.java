@@ -3,13 +3,17 @@ package hexlet.code.controller.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hexlet.code.dto.TaskCreateDto;
 import hexlet.code.dto.TaskDto;
+import hexlet.code.dto.TaskParamsDto;
 import hexlet.code.dto.TaskUpdateDto;
 import hexlet.code.exception.ResourceNotFoundException;
 import hexlet.code.mapper.TaskMapper;
 import hexlet.code.model.Task;
 import hexlet.code.repository.TaskRepository;
+import hexlet.code.specification.TaskSpecification;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +24,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -33,10 +38,15 @@ public class TaskController {
     private TaskRepository taskRepository;
 
     @Autowired
+    private TaskSpecification specBuilder;
+
+    @Autowired
     private TaskMapper mapper;
 
     @Autowired
     private ObjectMapper om;
+
+    private final int OFFSET = 10;
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
@@ -47,6 +57,16 @@ public class TaskController {
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("X-Total-Count", String.valueOf(result.size()))
                 .body(result);
+    }
+
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public List<TaskDto> index(TaskParamsDto taskParamsDto, @RequestParam(defaultValue = "1") int page) {
+        var spec = specBuilder.build(taskParamsDto);
+        Page<Task> tasks = taskRepository.findAll(spec, PageRequest.of(page -1, OFFSET));
+        var result = tasks.map(mapper::map);
+
+        return result.getContent();
     }
 
     @GetMapping("/{id}")

@@ -11,10 +11,10 @@ import java.util.List;
 public class TaskDto {
     private Long id;
     private Integer index;
-    private String name;
-    private String description;
-    private Long assigneeId;
-    private Long taskStatusId;
     private LocalDateTime createdAt;
-    private List<Long> labels;
+    private Long assignee_id;
+    private String title;
+    private String content;
+    private Long status;
+    private List<Long> taskLabelIds;
 }

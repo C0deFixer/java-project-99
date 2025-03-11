@@ -9,7 +9,6 @@ import hexlet.code.mapper.LabelMapper;
 import hexlet.code.model.Label;
 import hexlet.code.repository.LabelRepository;
 import hexlet.code.util.ModelGenerator;
-import org.assertj.core.api.AbstractOffsetDateTimeAssert;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,20 +17,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.awt.*;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static org.assertj.core.api.InstanceOfAssertFactories.list;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -41,6 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("dev")
 public class LabelControllerTest {
 
     @Autowired
@@ -94,7 +92,7 @@ public class LabelControllerTest {
     public void testIndex() throws Exception {
         Label testLabel1 = Instancio.of(modelGenerator.getLabelModel()).create();
         labelRepository.save(testLabel1);
-        var request = get("/api/labels/" + testLabel.getId())
+        var request = get("/api/labels/")
                 .with(jwt());
         var responce = mockMvc.perform(request).andExpect(status().isOk()).andReturn();
         String body = responce.getResponse().getContentAsString();
@@ -158,10 +156,10 @@ public class LabelControllerTest {
         LabelDto dto = mapper.map(testLabel);
         labelRepository.save(testLabel);
         var request = post("/api/labels/")
-                .with(jwt());
+                .with(jwt())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsString(dto));
         var responce = mockMvc.perform(request).andExpect(status().isBadRequest()).andReturn();
-        Label actualLabel = labelRepository.findByName().orElseThrow(() -> new ResourceNotFoundException("Label with name " + testLabel.getName() + " not found!"));
-        assertThat(actualLabel.getId()).isEqualTo(testLabel.getId());
     }
 
 }
