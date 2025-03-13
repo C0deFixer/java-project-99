@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -44,6 +45,15 @@ public class TaskStatusesController {
         return mapper.map(taskStatus);
     }
 
+/*    @GetMapping("/{slug}")
+    @ResponseStatus(HttpStatus.OK)
+    public TaskStatusDto showBySlug(@PathVariable String slug) {
+        var taskStatus = taskStatusRepository
+                .findBySlug(slug)
+                .orElseThrow(() -> new ResourceNotFoundException("Task with slug " + slug + " not found!"));
+        return mapper.map(taskStatus);
+    }*/
+
     @GetMapping()
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<TaskStatusDto>> index() {
@@ -60,6 +70,7 @@ public class TaskStatusesController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("isAuthenticated()")
     public TaskStatusDto create(@Valid @RequestBody TaskStatusCreateDto taskStatusCreateDto) {
         String slug = taskStatusCreateDto.getSlug();
         if (taskStatusRepository.findBySlug(slug).isPresent()) {
@@ -72,6 +83,7 @@ public class TaskStatusesController {
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("isAuthenticated()")
     public TaskStatusDto update(@Valid @RequestBody TaskStatusUpdateDto taskStatusUpdateDto, @PathVariable Long id) {
         TaskStatus taskStatus = taskStatusRepository
                 .findById(id)
@@ -90,6 +102,7 @@ public class TaskStatusesController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("isAuthenticated()")
     public void delete(@PathVariable Long id) {
         TaskStatus taskStatus = taskStatusRepository
                 .findById(id)
