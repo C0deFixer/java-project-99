@@ -17,4 +17,11 @@ rsa:
   private-key: classpath:certs/private.pem
   public-key: classpath:certs/public.pem
 # swagger-ui custom path
-springdoc.swagger-ui.path: /swagger-ui.html
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+  cache:
+    disabled: true

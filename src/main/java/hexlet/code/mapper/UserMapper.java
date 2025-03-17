@@ -25,13 +25,13 @@ public abstract class UserMapper {
     private PasswordEncoder encoder;
 
     @Mapping(target = "id", source = "id")
-    @Mapping(target = "email", source = "userName")
+    @Mapping(target = "email", source = "email")
     public abstract User map(UserDto model);
 
     @Mapping(target = "passwordDigest", source = "password")
     public abstract User map(UserCreateDto userCreateDTO);
 
-    @Mapping(target = "userName", source = "email")
+    @Mapping(target = "email", source = "email")
     //@Mapping(target = "password", ignore = true)
     public abstract UserDto map(User userModel);
 

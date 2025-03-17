@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -48,7 +49,7 @@ public class TaskController {
 
     private final int OFFSET = 10;
 
-    @GetMapping
+  /*  @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<TaskDto>> index() {
         List<Task> taskList = taskRepository.findAll();
@@ -57,20 +58,25 @@ public class TaskController {
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("X-Total-Count", String.valueOf(result.size()))
                 .body(result);
-    }
+    }*/
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<TaskDto> index(TaskParamsDto taskParamsDto, @RequestParam(defaultValue = "1") int page) {
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<TaskDto>> index(TaskParamsDto taskParamsDto, @RequestParam(defaultValue = "1") int page) {
         var spec = specBuilder.build(taskParamsDto);
-        Page<Task> tasks = taskRepository.findAll(spec, PageRequest.of(page -1, OFFSET));
+        Page<Task> tasks = taskRepository.findAll(spec, PageRequest.of(page - 1, OFFSET));
         var result = tasks.map(mapper::map);
-
-        return result.getContent();
+        List<TaskDto> taskList = result.getContent();
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("X-Total-Count ", String.valueOf(taskList.size()))
+                .body(result.getContent());
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("isAuthenticated()")
     public TaskDto show(@PathVariable Long id) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Task with id " + id + " not found!"));
@@ -79,13 +85,16 @@ public class TaskController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("isAuthenticated()")
     public TaskDto create(@Valid @RequestBody TaskCreateDto dto) {
         Task task = taskRepository.save(mapper.map(dto));
-        return mapper.map(task);
+        TaskDto taskDto = mapper.map(task);
+        return taskDto;
     }
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("isAuthenticated()")
     public TaskDto update(@Valid @RequestBody TaskUpdateDto dto, @PathVariable Long id) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Task with id " + id + " not found!"));
@@ -96,6 +105,7 @@ public class TaskController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("isAuthenticated()")
     public void delete(@PathVariable Long id) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Task with id " + id + " not found!"));

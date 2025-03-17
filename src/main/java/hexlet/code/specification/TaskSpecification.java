@@ -19,7 +19,7 @@ public class TaskSpecification {
     }
 
     private Specification<Task> withTitleCont(String titleCont) {
-        return (root, query, cb) -> titleCont == null ? cb.conjunction() : cb.like(root.get("title"), "%" + titleCont + "%");
+        return (root, query, cb) -> titleCont == null ? cb.conjunction() : cb.like(root.get("name"), "%" + titleCont + "%");
     }
 
     private Specification<Task> withAssigneeId(Long assigneeId) {
@@ -27,14 +27,18 @@ public class TaskSpecification {
     }
 
     private Specification<Task> withStatus(String statusSlug) {
-        return (root, query, cb) -> statusSlug == null ? cb.conjunction() : cb.equal(root.get("status").get("name"), statusSlug);
+        return (root, query, cb) -> statusSlug == null ? cb.conjunction() : cb.equal(root.get("taskStatus").get("name"), statusSlug);
     }
 
     private Specification<Task> withLabelid(Long labelid) {
-        return (root, query, cb) -> {
-            Join<Label, Task> labelTaskJoin = root.join("labels");
-            return cb.equal(labelTaskJoin.get("id"),labelid);
-        };
+        if (labelid == null) {
+            return (root, query, cb) -> cb.conjunction();
+        } else {
+            return (root, query, cb) -> {
+                Join<Label, Task> labelTaskJoin = root.join("labels");
+                return cb.equal(labelTaskJoin.get("id"), labelid);
+            };
+        }
     }
 
 }

@@ -20,8 +20,10 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -29,7 +31,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "tasks")
-@EntityListeners(EntityListeners.class)
+@EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
 @EqualsAndHashCode(of = "id")
@@ -50,14 +52,14 @@ public class Task implements BaseEntity{
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "taskStatus_id")
+    @JoinColumn(name = "task_status_id")
     private TaskStatus taskStatus; //cascade Type in TaskStatus don'nt let delete status linked to Task
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User assignee; //cascade Type in User don'nt let delete user linked to Taskmap
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany(fetch = FetchType.LAZY) //exclude CascadeType.PERSIST
     @JoinTable(name = "task_labels",
             joinColumns = @JoinColumn(name = "task_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "label_id", referencedColumnName = "id")

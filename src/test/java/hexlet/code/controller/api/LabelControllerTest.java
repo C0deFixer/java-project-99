@@ -29,7 +29,6 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -92,7 +91,7 @@ public class LabelControllerTest {
     public void testIndex() throws Exception {
         Label testLabel1 = Instancio.of(modelGenerator.getLabelModel()).create();
         labelRepository.save(testLabel1);
-        var request = get("/api/labels/")
+        var request = get("/api/labels")
                 .with(jwt());
         var responce = mockMvc.perform(request).andExpect(status().isOk()).andReturn();
         String body = responce.getResponse().getContentAsString();
@@ -113,7 +112,7 @@ public class LabelControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(om.writeValueAsString(mapper.map(testLabel1)));
 
-        var responce = mockMvc.perform(request).andExpect(status().isOk()).andReturn();
+        var responce = mockMvc.perform(request).andExpect(status().isCreated()).andReturn();
         String body = responce.getResponse().getContentAsString();
         Label labelActual = labelRepository.findByName(testLabel1.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("Label with name" + testLabel1.getName() + " not found"));
@@ -131,7 +130,7 @@ public class LabelControllerTest {
                 .with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(om.writeValueAsString(dto));
-        var responce = mockMvc.perform(request).andExpect(status().isCreated()).andReturn();
+        var responce = mockMvc.perform(request).andExpect(status().isOk()).andReturn();
         String body = responce.getResponse().getContentAsString();
         assertThatJson(body).and(v -> v.node("id").isEqualTo(testLabel.getId()),
                 v -> v.node("name").isEqualTo(testLabel1.getName()));
@@ -155,7 +154,7 @@ public class LabelControllerTest {
     public void testFailNameRepeate() throws Exception {
         LabelDto dto = mapper.map(testLabel);
         labelRepository.save(testLabel);
-        var request = post("/api/labels/")
+        var request = post("/api/labels")
                 .with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(om.writeValueAsString(dto));

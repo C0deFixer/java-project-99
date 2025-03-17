@@ -35,11 +35,12 @@ public class TaskStatus implements BaseEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @ToString.Include
+
     @Column(unique = true)
     @Size(min = 1)
     private String name;
 
+    @ToString.Include
     @Column(unique = true)
     @Size(min = 1)
     private String slug;

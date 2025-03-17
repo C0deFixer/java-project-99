@@ -58,7 +58,7 @@ public class ModelGenerator {
                 .ignore(Select.field(TaskStatus::getId))
                 .ignore(Select.field(TaskStatus::getTasks))
                 .ignore(Select.field(TaskStatus::getCreatedAt))
-                .supply(Select.field(TaskStatus::getName), () -> faker.job().position())
+                .supply(Select.field(TaskStatus::getSlug), () -> faker.job().title())
                 .toModel();
 
         taskModel = Instancio.of(Task.class)

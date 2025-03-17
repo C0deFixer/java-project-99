@@ -16,5 +16,6 @@ public class TaskTestDto {
     @JsonSetter(nulls = Nulls.SET)
     private JsonNullable<User> assignee;
     //@JsonSetter(contentNulls = Nulls.AS_EMPTY)
+    @JsonSetter(nulls = Nulls.SET)
     private JsonNullable<Set<Label>> labels;
 }

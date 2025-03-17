@@ -33,6 +33,9 @@ public class SecurityConfig {
     @Autowired
     private CustomUserDetailsService userService;
 
+ /*   public HandlerMappingIntrospector mvcHandlerMappingIntrospector() {
+        return new HandlerMappingIntrospector();
+    }*/
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
         return http.getSharedObject(AuthenticationManagerBuilder.class)
@@ -57,8 +60,10 @@ public class SecurityConfig {
                 //.securityMatcher("/api/**")
                 .authorizeHttpRequests(auth -> auth
                         // Разрешаем доступ только к /api/login, чтобы аутентифицироваться и получить токен
+                        .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/api/login").permitAll()
-                        .requestMatchers("/swagger-ui.html").permitAll()
+                        .requestMatchers("/swagger-ui/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("/").permitAll()
                         .requestMatchers("/index.html").permitAll()
                         .requestMatchers("/assets/**").permitAll()

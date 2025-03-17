@@ -51,19 +51,21 @@ public abstract class TaskMapper {
     @Mapping(source = "assignee.id", target = "assignee_id")
     @Mapping(source = "name", target = "title")
     @Mapping(source = "description", target = "content")
-    @Mapping(source = "taskStatus.name", target = "status")
+    @Mapping(source = "taskStatus.slug", target = "status")
     @Mapping(source = "labels", target = "taskLabelIds", qualifiedByName = "setToListLabelsId")
     public abstract TaskDto map(Task task);
 
     @Mapping(source = "assignee_id", target = "assignee")
     @Mapping(source = "title", target = "name")
     @Mapping(source = "content", target = "description")
-    @Mapping(source = "status", target = "taskStatus")
+    @Mapping(source = "status", target = "taskStatus", qualifiedByName = "getTaskStatusBySlug")
     @Mapping(target = "labels", source = "taskLabelIds", qualifiedByName = "getLabelsByIds")
     public abstract Task map(TaskDto taskDto);
 
     //@Mapping(target = "assignee", source = "assignee_id", qualifiedByName = "getUserById")
-    @Mapping(target = "assignee", source = "assignee_id") //Reference mapper using
+    @Mapping(target = "name", source = "title") //Reference mapper using
+    @Mapping(target = "description", source = "content")
+    @Mapping(target = "assignee", source = "assignee_id")
     @Mapping(target = "taskStatus", source = "status", qualifiedByName = "getTaskStatusBySlug")
     @Mapping(target = "labels", source = "taskLabelIds", qualifiedByName = "getLabelsByIds")
     public abstract void update(TaskUpdateDto dto, @MappingTarget Task model);
