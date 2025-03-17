@@ -8,3 +8,9 @@ logging:
   level:
     org.springframework.web: "warn"
     org.hibernate: "warn"
+sentry:
+  dsn: https://e79f3dd53cb24c4262d0ca88c2794990@o4508992797343744.ingest.de.sentry.io/4508992869367888
+  # Add data like request headers and IP for users,
+  # see https://docs.sentry.io/platforms/java/guides/spring-boot/data-management/data-collected/ for more info
+  send-default-pii: true
+

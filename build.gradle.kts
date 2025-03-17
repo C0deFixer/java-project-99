@@ -3,6 +3,7 @@ plugins {
 	checkstyle
 	id("org.springframework.boot") version "3.4.2"
 	id("io.spring.dependency-management") version "1.1.7"
+	id("io.sentry.jvm.gradle") version "5.3.0"
 }
 
 group = "hexlet.code"
@@ -54,6 +55,8 @@ dependencies {
 	implementation("net.javacrumbs.json-unit:json-unit-assertj:3.2.2")
 	implementation("net.datafaker:datafaker:2.0.2")
 
+	implementation("io.sentry:sentry-spring-boot-starter:8.3.0")
+
 
 	runtimeOnly("com.h2database:h2")
 	runtimeOnly("org.postgresql:postgresql")
@@ -67,6 +70,18 @@ dependencies {
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
+sentry {
+	// Generates a JVM (Java, Kotlin, etc.) source bundle and uploads your source code to Sentry.
+	// This enables source context, allowing you to see your source
+	// code as part of your stack traces in Sentry.
+	includeSourceContext = true
+
+	org = "hexlet-g1"
+	projectName = "java-spring-boot"
+	authToken = System.getenv("SENTRY_AUTH_TOKEN")
+}
+
 tasks.withType<Test> {
 	useJUnitPlatform()
 }
+
