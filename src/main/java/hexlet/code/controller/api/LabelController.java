@@ -52,7 +52,8 @@ public class LabelController {
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public LabelDto show(@PathVariable Long id) {
-        Label label = labelRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Label with id " + id + " not found!"));
+        Label label = labelRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Label with id " + id + " not found!"));
         return mapper.map(label);
     }
 
@@ -67,7 +68,8 @@ public class LabelController {
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public LabelDto create(@Valid @RequestBody LabelUpdateDto dto, @PathVariable Long id) {
-        Label label = labelRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Label with id " + id + " not found!"));
+        Label label = labelRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Label with id " + id + " not found!"));
         mapper.update(dto, label);
         labelRepository.save(label); //name unique check as constrains
         return mapper.map(label);

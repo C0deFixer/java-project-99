@@ -29,7 +29,7 @@ import java.util.List;
 @Setter
 @EqualsAndHashCode(of = {"id"})
 @ToString(onlyExplicitlyIncluded = true)
-public class TaskStatus implements BaseEntity{
+public class TaskStatus implements BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

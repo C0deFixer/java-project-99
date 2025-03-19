@@ -3,6 +3,7 @@ package hexlet.code.controller.api;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.p6spy.engine.spy.appender.Slf4JLogger;
 import hexlet.code.dto.TaskDto;
 import hexlet.code.mapper.LabelMapper;
 import hexlet.code.mapper.TaskMapper;
@@ -17,17 +18,23 @@ import hexlet.code.repository.UserRepository;
 import hexlet.code.util.ModelGenerator;
 import hexlet.code.util.TaskTestDto;
 import hexlet.code.util.TaskTestMapper;
+import lombok.extern.flogger.Flogger;
 import net.datafaker.Faker;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.jdbc.datasource.init.DataSourceInitializer;
+import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
@@ -35,8 +42,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import javax.sql.DataSource;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.IntStream;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
@@ -73,6 +82,9 @@ public class TaskControllerTest {
     private LabelRepository labelRepository;
 
     @Autowired
+    private DataSource dataSource;
+
+    @Autowired
     private Faker faker;
 
     @Autowired
@@ -91,6 +103,7 @@ public class TaskControllerTest {
     private TaskStatus testTaskStatus;
 
     private List<Label> testLabels;
+
 
     private JwtRequestPostProcessor token;
     @Autowired
@@ -123,9 +136,10 @@ public class TaskControllerTest {
 
     @BeforeEach
     void setUp() {
-        /*taskRepository.deleteAll();
+        System.out.println("----CLEAR REPO before test starting---------");
+        taskRepository.deleteAll();
         taskStatusRepository.deleteAll();
-        labelRepository.deleteAll();*/
+        labelRepository.deleteAll();
 
         mvc = MockMvcBuilders.webAppContextSetup(wac)
                 .defaultResponseCharacterEncoding(StandardCharsets.UTF_8)
@@ -144,63 +158,106 @@ public class TaskControllerTest {
         Label testLabel1 = createLabel();
         Label testLabel2 = createLabel();
         testLabels = List.of(testLabel1, testLabel2);
-       /* testLabels = IntStream.of(3).boxed().map(x -> createLabel())
-                .peek(System.out::println) //TODO replace to logger
-                .toList();;*/
     }
 
-    @Test
-    @DisplayName("Test Task index without filter")
-    @Sql("classpath:/taskTestData.sql")
-    public void testIndex() throws Exception {
-        // List.of(createTask());
-        List<Task> taskList = taskRepository.findAll();
-        /*List<Task> taskList = IntStream.of(5).boxed().map(x -> createTask())
-                .peek(System.out::println)
-                .toList();*/
-        var request = get("/api/tasks")
-                .with(token);
+    @Nested
+    class TestIndex {
+        @Test
+        @DisplayName("Test Task index without filter")
+        public void testIndex() throws Exception {
+            List<Task> taskList = taskRepository.findAll();
+            taskList.addAll(IntStream.of(5).boxed().map(x -> createTask())
+                    .peek(System.out::println)
+                    .toList());
+            var request = get("/api/tasks")
+                    .with(token);
 
-        var responce = mvc.perform(request).andExpect(status().isOk()).andReturn();
-        String body = responce.getResponse().getContentAsString();
-        assertThatJson(body).isArray();
-        List<TaskDto> dtoList = om.readValue(body, new TypeReference<List<TaskDto>>() {
-        });
-        List<Task> taskListTest = dtoList.stream().map(mapper::map).toList();
-        assertThat(taskListTest).containsExactlyInAnyOrderElementsOf(taskList);
+            var responce = mvc.perform(request).andExpect(status().isOk()).andReturn();
+            String body = responce.getResponse().getContentAsString();
+            assertThatJson(body).isArray();
+            List<TaskDto> dtoList = om.readValue(body, new TypeReference<List<TaskDto>>() {
+            });
+            List<Task> taskListTest = dtoList.stream().map(mapper::map).toList();
+            assertThat(taskListTest).containsExactlyInAnyOrderElementsOf(taskList);
 
+        }
     }
 
-    @ParameterizedTest(name = "Test Task Show {index} - {0} case")
-    //@ValueSource(strings = {"{\"assignee\": null}", "{\"labels\":[]}", "{}"})
-    //@ValueSource(strings  = {"{\"assignee\":null}"})
-    //@ValueSource(strings  = {"{\"labels\":[]}"})
-    @ValueSource(strings = {"{}"})
-    public void testShow(String argDto) throws Exception {
-        om.configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, false);
-        //Applying test argument to testTask Object through Dto mapping
-        Task testTask = createTask(om.readValue(argDto, new TypeReference<TaskTestDto>() {
-        }));
+    @Nested
+    class TestShow {
+        @ParameterizedTest(name = "Test Task Show {index} - {0} case")
+        @ValueSource(strings = {"{\"assignee\": null}", "{\"labels\":[]}", "{}"})
+        //@ValueSource(strings  = {"{\"assignee\":null}"})
+        //@ValueSource(strings  = {"{\"labels\":[]}"})
+        //@ValueSource(strings = {"{}"})
+        public void testShow(String argDto) throws Exception {
+            om.configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, false);
+            //Applying test argument to testTask Object through Dto mapping
+            Task testTask = createTask(om.readValue(argDto, new TypeReference<TaskTestDto>() {
+            }));
 
-        List<Long> testLabelsId = testTask.getLabels().stream().map(Label::getId).toList();
+            List<Long> testLabelsId = testTask.getLabels().stream().map(Label::getId).toList();
 
-        var request = get("/api/tasks/" + testTask.getId())
-                .with(token);
-        var responce = mvc.perform(request).andExpect(status().isOk()).andReturn();
-        String body = responce.getResponse().getContentAsString();
-        assertThatJson(body).and(v -> v.node("index").isEqualTo(testTask.getIndex()),
-                        v -> v.node("id").isEqualTo(testTask.getId()),
-                        v -> v.node("title").isEqualTo(testTask.getName()),
-                        v -> v.node("content").isEqualTo(testTask.getDescription()),
-                        v -> v.node("taskLabelIds").isArray().containsExactlyInAnyOrderElementsOf(testLabelsId),
-                        v -> v.node("status").isEqualTo(testTask.getTaskStatus().getSlug()))
-                .and(v -> {
-                    if (testTask.getAssignee() == null) {
-                        v.node("assignee_id").isAbsent();
-                    } else {
-                        v.node("assignee_id").isEqualTo(testTask.getAssignee().getId());
-                    }
-                });
+            var request = get("/api/tasks/" + testTask.getId())
+                    .with(token);
+            var responce = mvc.perform(request).andExpect(status().isOk()).andReturn();
+            String body = responce.getResponse().getContentAsString();
+            assertThatJson(body).and(v -> v.node("index").isEqualTo(testTask.getIndex()),
+                            v -> v.node("id").isEqualTo(testTask.getId()),
+                            v -> v.node("title").isEqualTo(testTask.getName()),
+                            v -> v.node("content").isEqualTo(testTask.getDescription()),
+                            v -> v.node("taskLabelIds").isArray().containsExactlyInAnyOrderElementsOf(testLabelsId),
+                            v -> v.node("status").isEqualTo(testTask.getTaskStatus().getSlug()))
+                    .and(v -> {
+                        if (testTask.getAssignee() == null) {
+                            v.node("assignee_id").isAbsent();
+                        } else {
+                            v.node("assignee_id").isEqualTo(testTask.getAssignee().getId());
+                        }
+                    });
+        }
+    }
+
+    @Nested
+    class TestUpdate {
+        @ParameterizedTest(name = "Test Task update {index} - {0} ")
+        @ValueSource(ints = {0, 1})
+        public void testUpdate(int labelReplaceIndex) throws Exception {
+            Task testTask = createTask();
+            Label testLabelUpdate = createLabel();
+            User testUser1 = Instancio.of(modelGenerator.getUserModel()).create();
+            TaskStatus testTaskStatus1 = Instancio.of(modelGenerator.getTaskStatusModel()).create();
+            testTaskStatus1.setName(testTaskStatus1.getSlug());
+
+            testTask.setIndex(faker.number().positive());
+            testTask.setName(faker.name().title());
+            testTask.setDescription(faker.text().text(50));
+            testTask.setAssignee(userRepository.save(testUser1));
+            testTask.setTaskStatus(taskStatusRepository.save(testTaskStatus1));
+            testTask.removeLabel(testLabels.get(labelReplaceIndex));
+            testTask.addLabel(testLabelUpdate);
+            List<Long> taskLabelsIds = testTask.getLabels()
+                    .stream().map(Label::getId).toList();
+
+            TaskDto taskDto = mapper.map(testTask);
+            String testBody = om.writeValueAsString(taskDto);
+            var request = put("/api/tasks/" + testTask.getId())
+                    .header("Content-Type", MediaType.APPLICATION_JSON)
+                    .with(token)
+                    .content(testBody);
+
+            var responce = mvc.perform(request).andExpect(status().isOk()).andReturn();
+            String body = responce.getResponse().getContentAsString();
+            assertThatJson(body).and(v -> v.node("index").isEqualTo(testTask.getIndex()),
+                    v -> v.node("id").isEqualTo(testTask.getId()),
+                    v -> v.node("title").isEqualTo(testTask.getName()),
+                    v -> v.node("content").isEqualTo(testTask.getDescription()),
+                    v -> v.node("assignee_id").isEqualTo(testTask.getAssignee().getId()),
+                    v -> v.node("status").isEqualTo(testTask.getTaskStatus().getSlug()),
+                    v -> v.node("taskLabelIds").isArray()
+                            .containsExactlyInAnyOrderElementsOf(taskLabelsIds)
+            );
+        }
     }
 
     @ParameterizedTest(name = "Test Task Create {index} - {0} case")
@@ -240,106 +297,74 @@ public class TaskControllerTest {
     }
 
 
-    @ParameterizedTest(name = "Test Task update {index} - {0} ")
-    @ValueSource(ints = {0, 1})
-    public void testUpdate(int labelReplaceIndex) throws Exception {
-        Task testTask = createTask();
-        Label testLabelUpdate = createLabel();
-        User testUser1 = Instancio.of(modelGenerator.getUserModel()).create();
-        TaskStatus testTaskStatus1 = Instancio.of(modelGenerator.getTaskStatusModel()).create();
-        testTaskStatus1.setName(testTaskStatus1.getSlug());
+    @Nested
+    class TestDelete {
 
-        testTask.setIndex(faker.number().positive());
-        testTask.setName(faker.name().title());
-        testTask.setDescription(faker.text().text(50));
-        testTask.setAssignee(userRepository.save(testUser1));
-        testTask.setTaskStatus(taskStatusRepository.save(testTaskStatus1));
-        testTask.removeLabel(testLabels.get(labelReplaceIndex));
-        testTask.addLabel(testLabelUpdate);
-        List<Long> taskLabelsIds = testTask.getLabels()
-                .stream().map(Label::getId).toList();
+        @Test
+        @DisplayName("Test Task Delete")
+        public void testDelete() throws Exception {
+            Task testTask = createTask();
+            var request = delete("/api/tasks/" + testTask.getId())
+                    .with(token);
+            var result = mvc.perform(request).andExpect(status().isNoContent()).andReturn();
+            assertThat(taskRepository.findById(testTask.getId())).isEmpty();
+        }
 
-        TaskDto taskDto = mapper.map(testTask);
-        String testBody = om.writeValueAsString(taskDto);
-        var request = put("/api/tasks/" + testTask.getId())
-                .header("Content-Type", MediaType.APPLICATION_JSON)
-                .with(token)
-                .content(testBody);
+        @Test
+        @DisplayName("Test Fail access without token")
+        public void testfailAccess() throws Exception {
+            var request = delete("/api/tasks/"); //No token apply
+            var result = mvc.perform(request).andExpect(status().isUnauthorized()).andReturn();
+        }
 
-        var responce = mvc.perform(request).andExpect(status().isOk()).andReturn();
-        String body = responce.getResponse().getContentAsString();
-        assertThatJson(body).and(v -> v.node("index").isEqualTo(testTask.getIndex()),
-                v -> v.node("id").isEqualTo(testTask.getId()),
-                v -> v.node("title").isEqualTo(testTask.getName()),
-                v -> v.node("content").isEqualTo(testTask.getDescription()),
-                v -> v.node("assignee_id").isEqualTo(testTask.getAssignee().getId()),
-                v -> v.node("status").isEqualTo(testTask.getTaskStatus().getSlug()),
-                v -> v.node("taskLabelIds").isArray()
-                        .containsExactlyInAnyOrderElementsOf(taskLabelsIds)
-        );
+        @Test
+        @DisplayName("Test Fail delete user linked with Task")
+        public void testfailDeleteUser() throws Exception {
+            Task testTask = createTask();
+            var request = delete("/api/users/" + testUser.getId())
+                    .with(jwt());
+            var result = mvc.perform(request).andExpect(status().isBadRequest()).andReturn(); //Cascade
+            //var result = mvc.perform(request).andReturn();
+            assertThat(userRepository.findById(testUser.getId())).isPresent();
+        }
     }
 
-    @Test
-    @DisplayName("Test Task Delete")
-    public void testDelete() throws Exception {
-        Task testTask = createTask();
-        var request = delete("/api/tasks/" + testTask.getId())
-                .with(token);
-        var result = mvc.perform(request).andExpect(status().isNoContent()).andReturn();
-        assertThat(taskRepository.findById(testTask.getId())).isEmpty();
+    @Nested
+    class TestFilter {
+
+        void setUp(){
+            taskRepository.deleteAll();
+            System.out.println("----INSERT TEST DATA VIA SQL SCRIPT FILE--------");
+            ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
+            populator.addScripts(
+                    new ClassPathResource("taskTestData.sql"));
+            populator.setSeparator(";");
+            populator.execute(dataSource); // run code that uses the test schema and data
+
+        }
+        @ParameterizedTest
+        @ValueSource(strings = {"?titleCont=urgent&assigneeId=34&status=try&labelId=12"})
+        @DisplayName("Test Filter tasks index")
+         //generating test data for all kind of filters checking
+        public void testFilter(String filterStringRequest) throws Exception {
+            setUp(); //use
+            //System.out.println("TASK in REPO-----------------");
+            System.out.println(taskRepository.findAll());
+            var request = get("/api/tasks" + filterStringRequest)
+                    .with(token);
+            var responce = mvc.perform(request).andExpect(status().isOk())
+                    .andReturn();
+            String body = responce.getResponse().getContentAsString();
+            assertThatJson(body).isArray().hasSize(2)
+                    .allSatisfy(element ->
+                            assertThatJson(element)
+                                    .and(v -> v.node("title").asString().contains("urgent"),
+                                            v -> v.node("assignee_id").isEqualTo(34),
+                                            v -> v.node("status").asString().contains("try"),
+                                            v -> v.node("taskLabelIds").isArray().contains(12)));
+
+
+        }
     }
-
-    @Test
-    @DisplayName("Test Fail access without token")
-    public void testfailAccess() throws Exception {
-        var request = delete("/api/tasks/"); //No token apply
-        var result = mvc.perform(request).andExpect(status().isUnauthorized()).andReturn();
-    }
-
-    @Test
-    @DisplayName("Test Fail delete user linked with Task")
-    public void testfailDeleteUser() throws Exception {
-        Task testTask = createTask();
-        var request = delete("/api/users/" + testUser.getId())
-                .with(jwt());
-        var result = mvc.perform(request).andExpect(status().isBadRequest()).andReturn(); //Cascade
-        //var result = mvc.perform(request).andReturn();
-        assertThat(userRepository.findById(testUser.getId())).isPresent();
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"?titleCont=urgent&assigneeId=34&status=try&labelId=12"})
-    @DisplayName("Test Filter tasks index")
-    @Sql("classpath:/taskTestData.sql") //generating test data for all kind of filters checking
-    public void testFilter(String filterStringRequest) throws Exception {
-      /*  List<User> testUsers = IntStream.of(10).boxed()
-                .map(x -> Instancio.of(modelGenerator.getUserModel()).create())
-                .map(userRepository::save).toList();
-        List<TaskStatus> testStatuses = IntStream.of(5).boxed()
-                .map(x -> Instancio.of(modelGenerator.getTaskStatusModel()).create())
-                .map(taskStatusRepository::save).toList();
-        Random idUserRandom = new Random();
-        idUserRandom.ints().
-        List<Task> testStatuses = new Random().ints() boxed()
-                .of(3).boxed()
-                .map(x -> Instancio.of(modelGenerator.getTaskStatusModel()).create())
-                .map(taskStatusRepository::save).toList();10,1,10
-*/
-        var request = get("/api/tasks" + filterStringRequest)
-                .with(token);
-        var responce = mvc.perform(request).andExpect(status().isOk())
-                .andReturn();
-        String body = responce.getResponse().getContentAsString();
-        assertThatJson(body).isArray().hasSize(2)
-                .allSatisfy(element ->
-                assertThatJson(element)
-                        .and(v -> v.node("title").asString().contains("urgent"),
-                                v -> v.node("assignee_id").isEqualTo(34),
-                                v -> v.node("status").asString().contains("try"),
-                                v -> v.node("taskLabelIds").isArray().contains(12)));
-
-
-    }
-
 
 }

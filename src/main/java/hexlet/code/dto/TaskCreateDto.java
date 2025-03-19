@@ -1,5 +1,6 @@
 package hexlet.code.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -11,10 +12,11 @@ import java.util.List;
 @Setter
 public class TaskCreateDto {
     private Integer index;
-    private Long assignee_id;
+    @JsonProperty("assignee_id")
+    private Long assigneeId;
     @Size(min = 1)
     private String title;
-    //@NotBlank
+
     private String content;
     @NotNull
     private String status;

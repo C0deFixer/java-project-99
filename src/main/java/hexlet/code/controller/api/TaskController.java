@@ -47,25 +47,15 @@ public class TaskController {
     @Autowired
     private ObjectMapper om;
 
-    private final int OFFSET = 10;
-
-  /*  @GetMapping
-    @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<List<TaskDto>> index() {
-        List<Task> taskList = taskRepository.findAll();
-        var result = taskList.stream().map(mapper::map).toList();
-        return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("X-Total-Count", String.valueOf(result.size()))
-                .body(result);
-    }*/
+    private static final int OFF_SET = 10;
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<TaskDto>> index(TaskParamsDto taskParamsDto, @RequestParam(defaultValue = "1") int page) {
+    public ResponseEntity<List<TaskDto>> index(TaskParamsDto taskParamsDto,
+                                               @RequestParam(defaultValue = "1") int page) {
         var spec = specBuilder.build(taskParamsDto);
-        Page<Task> tasks = taskRepository.findAll(spec, PageRequest.of(page - 1, OFFSET));
+        Page<Task> tasks = taskRepository.findAll(spec, PageRequest.of(page - 1, OFF_SET));
         var result = tasks.map(mapper::map);
         List<TaskDto> taskList = result.getContent();
         return ResponseEntity.ok()

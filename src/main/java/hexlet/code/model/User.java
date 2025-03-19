@@ -60,7 +60,9 @@ public class User implements UserDetails, BaseEntity {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "assignee", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY) //CascadeType avoid delete User with linked Tasks
+    @OneToMany(mappedBy = "assignee",
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE},
+            fetch = FetchType.LAZY) //CascadeType avoid delete User with linked Tasks
     private List<Task> taskList = new ArrayList<>();
 
     public User() {

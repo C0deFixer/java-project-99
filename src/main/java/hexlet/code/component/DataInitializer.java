@@ -39,6 +39,7 @@ public class DataInitializer implements ApplicationRunner {
 
     @Autowired
     private IOUtils ioUtils;
+
     @Override
     public void run(ApplicationArguments args) throws Exception {
         String email = "hexlet@example.com";
@@ -52,16 +53,13 @@ public class DataInitializer implements ApplicationRunner {
         admin.setLastName("admin");
         userRepository.save(admin);
 
-        //initiateData( "/data/taskStatuses.json", taskStatusRepository);
-        initiateData( "/data/taskStatuses.json", taskStatusRepository, new TypeReference<List<TaskStatus>>(){});
-        //initiateData("/data/labels.json", labelRepository);
-        initiateData("/data/labels.json", labelRepository, new TypeReference<List<Label>>(){});
+        initiateData("/data/taskStatuses.json", taskStatusRepository, new TypeReference<List<TaskStatus>>() {
+        });
+        initiateData("/data/labels.json", labelRepository, new TypeReference<List<Label>>() {
+        });
     }
 
     private <T> void initiateData(String path, JpaRepository repository, TypeReference<List<T>> tr) throws IOException {
-        /*List<Map<String, Object>> dataList = objectMapper
-                .readValue(ioUtils.readFileContent(path),
-                        new TypeReference<List<Map<String, Object>>>() {});*/
         String jsonListOfObjects = ioUtils.readFileContent(path);
         List<T> dataList = objectMapper.readValue(jsonListOfObjects, tr);
 

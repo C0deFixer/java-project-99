@@ -1,6 +1,5 @@
 package hexlet.code.model;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -23,7 +22,6 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -36,7 +34,7 @@ import java.util.Set;
 @Setter
 @EqualsAndHashCode(of = "id")
 @ToString(onlyExplicitlyIncluded = true)
-public class Task implements BaseEntity{
+public class Task implements BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -76,6 +74,7 @@ public class Task implements BaseEntity{
     public void removeLabel(Label label) {
         this.labels.remove(label);
     }
+
     public void addLabels(List<Label> addlabels) {
         Iterator<Label> iterator = addlabels.iterator();
         while (iterator.hasNext()) {

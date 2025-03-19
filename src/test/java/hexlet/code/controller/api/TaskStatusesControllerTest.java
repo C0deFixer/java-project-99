@@ -6,6 +6,7 @@ import hexlet.code.dto.TaskStatusDto;
 import hexlet.code.exception.ResourceNotFoundException;
 import hexlet.code.mapper.TaskStatusMapper;
 import hexlet.code.model.TaskStatus;
+import hexlet.code.repository.TaskRepository;
 import hexlet.code.repository.TaskStatusRepository;
 import hexlet.code.util.ModelGenerator;
 import net.datafaker.Faker;
@@ -29,6 +30,7 @@ import java.util.List;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oidcLogin;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -46,6 +48,9 @@ class TaskStatusesControllerTest {
 
     @Autowired
     private TaskStatusRepository taskStatusRepository;
+
+    @Autowired
+    private TaskRepository taskRepository;
 
     @Autowired
     private ModelGenerator modelGenerator;
@@ -70,6 +75,7 @@ class TaskStatusesControllerTest {
 
     @BeforeEach
     void setUp() throws Exception {
+        taskRepository.deleteAll();
         taskStatusRepository.deleteAll();
         mockMvc = MockMvcBuilders.webAppContextSetup(wac)
                 .defaultResponseCharacterEncoding(StandardCharsets.UTF_8)

@@ -19,15 +19,21 @@ public class TaskSpecification {
     }
 
     private Specification<Task> withTitleCont(String titleCont) {
-        return (root, query, cb) -> titleCont == null ? cb.conjunction() : cb.like(root.get("name"), "%" + titleCont + "%");
+        return (root, query, cb) -> titleCont == null
+                ? cb.conjunction()
+                : cb.like(root.get("name"), "%" + titleCont + "%");
     }
 
     private Specification<Task> withAssigneeId(Long assigneeId) {
-        return (root, query, cb) -> assigneeId == null ? cb.conjunction() : cb.equal(root.get("assignee").get("id"), assigneeId);
+        return (root, query, cb) -> assigneeId == null
+                ? cb.conjunction()
+                : cb.equal(root.get("assignee").get("id"), assigneeId);
     }
 
     private Specification<Task> withStatus(String statusSlug) {
-        return (root, query, cb) -> statusSlug == null ? cb.conjunction() : cb.equal(root.get("taskStatus").get("name"), statusSlug);
+        return (root, query, cb) -> statusSlug == null
+                ? cb.conjunction()
+                : cb.equal(root.get("taskStatus").get("name"), statusSlug);
     }
 
     private Specification<Task> withLabelid(Long labelid) {

@@ -8,6 +8,7 @@ import hexlet.code.exception.ResourceNotFoundException;
 import hexlet.code.mapper.LabelMapper;
 import hexlet.code.model.Label;
 import hexlet.code.repository.LabelRepository;
+import hexlet.code.repository.TaskRepository;
 import hexlet.code.util.ModelGenerator;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,6 +51,9 @@ public class LabelControllerTest {
     private LabelRepository labelRepository;
 
     @Autowired
+    private TaskRepository taskRepository;
+
+    @Autowired
     private ModelGenerator modelGenerator;
 
     @Autowired
@@ -62,6 +66,7 @@ public class LabelControllerTest {
 
     @BeforeEach
     void setUp() {
+        taskRepository.deleteAll();
         labelRepository.deleteAll();
         mockMvc = MockMvcBuilders.webAppContextSetup(wac)
                 .defaultResponseCharacterEncoding(StandardCharsets.UTF_8)

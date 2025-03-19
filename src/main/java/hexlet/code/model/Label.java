@@ -29,7 +29,7 @@ import java.util.Set;
 @Setter
 @EqualsAndHashCode(of = "id")
 @ToString(onlyExplicitlyIncluded = true)
-public class Label implements BaseEntity{
+public class Label implements BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;

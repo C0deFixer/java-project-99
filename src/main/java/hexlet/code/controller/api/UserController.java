@@ -8,6 +8,7 @@ import hexlet.code.mapper.UserMapper;
 import hexlet.code.model.User;
 import hexlet.code.repository.UserRepository;
 import hexlet.code.service.CustomUserDetailsService;
+import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -67,12 +68,8 @@ public class UserController {
     @ResponseStatus(HttpStatus.CREATED)
     public UserDto create(@Valid @RequestBody UserCreateDto userCreateDto) {
         User user = mapper.map(userCreateDto);
-        if (userRepository.findByEmail(user.getEmail()) != null) {
-            //TODO throw correct exception
-            throw new ResourceNotFoundException("User with e-mail " + user.getEmail() + " exist already!");
-        }
-        //Password Digest already mapped through encoder
-        user = userRepository.save(user);
+        //Password Digest already mapped through encoder - but it's smell code
+        user = userRepository.save(user); //Constraint violation exception catch if e-mail exist already
         UserDto userDto = mapper.map(user);
         return userDto;
     }

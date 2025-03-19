@@ -18,8 +18,8 @@ spring:
       #data-locations: classpath:resources/data.sql
 logging:
   level:
-    org.springframework.web: trace
+    org.springframework.web: debug
     org.springframework.security: warn
-    org.hibernate: debug
+    org.hibernate: info
     org.springframework.test.context.jdbc: debug # Test init sql data
-debug: true
+#debug: true

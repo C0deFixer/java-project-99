@@ -7,7 +7,6 @@ import hexlet.code.exception.ResourceNotFoundException;
 import hexlet.code.model.Label;
 import hexlet.code.model.Task;
 import hexlet.code.model.TaskStatus;
-import hexlet.code.model.User;
 import hexlet.code.repository.LabelRepository;
 import hexlet.code.repository.TaskStatusRepository;
 import hexlet.code.repository.UserRepository;
@@ -41,21 +40,21 @@ public abstract class TaskMapper {
     @Autowired
     private LabelRepository labelRepository;
 
-    @Mapping(source = "assignee_id", target = "assignee")
+    @Mapping(source = "assigneeId", target = "assignee")
     @Mapping(source = "title", target = "name")
     @Mapping(source = "content", target = "description")
     @Mapping(source = "status", target = "taskStatus", qualifiedByName = "getTaskStatusBySlug")
     @Mapping(target = "labels", source = "taskLabelIds", qualifiedByName = "getLabelsByIds")
     public abstract Task map(TaskCreateDto dto);
 
-    @Mapping(source = "assignee.id", target = "assignee_id")
+    @Mapping(source = "assignee.id", target = "assigneeId")
     @Mapping(source = "name", target = "title")
     @Mapping(source = "description", target = "content")
     @Mapping(source = "taskStatus.slug", target = "status")
     @Mapping(source = "labels", target = "taskLabelIds", qualifiedByName = "setToListLabelsId")
     public abstract TaskDto map(Task task);
 
-    @Mapping(source = "assignee_id", target = "assignee")
+    @Mapping(source = "assigneeId", target = "assignee")
     @Mapping(source = "title", target = "name")
     @Mapping(source = "content", target = "description")
     @Mapping(source = "status", target = "taskStatus", qualifiedByName = "getTaskStatusBySlug")
@@ -65,7 +64,7 @@ public abstract class TaskMapper {
     //@Mapping(target = "assignee", source = "assignee_id", qualifiedByName = "getUserById")
     @Mapping(target = "name", source = "title") //Reference mapper using
     @Mapping(target = "description", source = "content")
-    @Mapping(target = "assignee", source = "assignee_id")
+    @Mapping(target = "assignee", source = "assigneeId")
     @Mapping(target = "taskStatus", source = "status", qualifiedByName = "getTaskStatusBySlug")
     @Mapping(target = "labels", source = "taskLabelIds", qualifiedByName = "getLabelsByIds")
     public abstract void update(TaskUpdateDto dto, @MappingTarget Task model);
@@ -82,7 +81,7 @@ public abstract class TaskMapper {
 //    }
 
     @Named("setToListLabelsId")
-    public List<Long> setToListLabelsId(Set<Label> set){
+    public List<Long> setToListLabelsId(Set<Label> set) {
         return set.stream().map(Label::getId).toList();
     }
 

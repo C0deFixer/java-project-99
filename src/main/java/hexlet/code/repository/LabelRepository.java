@@ -10,7 +10,7 @@ import java.util.Set;
 
 @Repository
 public interface LabelRepository extends JpaRepository<Label, Long> {
-    public Optional<Label> findByName(String name);
+    Optional<Label> findByName(String name);
 
-    public Set<Label> findAllByIdIn(List<Long> ids);
+    Set<Label> findAllByIdIn(List<Long> ids);
 }
