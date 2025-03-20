@@ -19,4 +19,5 @@ ENV ADRESS 0.0.0.0
 EXPOSE 8080/tcp
 
 #CMD /bin/bash
-CMD java -jar build/libs/Task_manager-0.0.1-SNAPSHOT.jar
+#CMD ./build/install/app/bin/app
+CMD java -jar build/libs/app-0.0.1-SNAPSHOT.jar
