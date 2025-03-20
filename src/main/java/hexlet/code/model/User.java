@@ -16,15 +16,14 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 @EntityListeners(AuditingEntityListener.class)
@@ -55,10 +54,7 @@ public class User implements UserDetails, BaseEntity {
     private String passwordDigest;
 
     @CreatedDate
-    private Date createdAt;
-
-    @UpdateTimestamp
-    private Date updatedAt;
+    private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "assignee",
             cascade = {CascadeType.PERSIST, CascadeType.MERGE},
