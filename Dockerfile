@@ -15,6 +15,7 @@ RUN ./gradlew --no-daemon build
 
 ENV JAVA_OPTS "-Xmx512M -Xms512M"
 
+ENV ADRESS 0.0.0.0
 EXPOSE 8080/tcp
 
 #CMD /bin/bash
