@@ -57,10 +57,10 @@ public class UserController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{id}")
-    public ResponseEntity<UserDto> show(@PathVariable long id) {
+    public UserDto show(@PathVariable long id) {
         var user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User with id" + id + " not found!"));
-        return ResponseEntity.ok(mapper.map(user));
+        return mapper.map(user);
     }
 
     @PostMapping

@@ -69,16 +69,6 @@ public abstract class TaskMapper {
     @Mapping(target = "labels", source = "taskLabelIds", qualifiedByName = "getLabelsByIds")
     public abstract void update(TaskUpdateDto dto, @MappingTarget Task model);
 
-//    @Named("getUserById")
-//    public User getUserById(Long id) {
-//        if (id == null) {
-//            return null;
-//        } else {
-//            return userRepository.findById(id)
-//                    .orElseThrow(() ->
-//                            new ResourceNotFoundException(String.format("User with id %s not found", id)));
-//        }
-//    }
 
     @Named("setToListLabelsId")
     public List<Long> setToListLabelsId(Set<Label> set) {

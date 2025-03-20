@@ -13,6 +13,8 @@ spring:
         dialect: "org.hibernate.dialect.PostgreSQLDialect"
  # profiles:
  #   default: "prod"
+  jackson:
+    date-format: yyyy-MM-dd
 rsa:
   private-key: classpath:certs/private.pem
   public-key: classpath:certs/public.pem
