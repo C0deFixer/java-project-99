@@ -3,7 +3,6 @@ package hexlet.code.controller.api;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.p6spy.engine.spy.appender.Slf4JLogger;
 import hexlet.code.dto.TaskDto;
 import hexlet.code.mapper.LabelMapper;
 import hexlet.code.mapper.TaskMapper;
@@ -18,7 +17,6 @@ import hexlet.code.repository.UserRepository;
 import hexlet.code.util.ModelGenerator;
 import hexlet.code.util.TaskTestDto;
 import hexlet.code.util.TaskTestMapper;
-import lombok.extern.flogger.Flogger;
 import net.datafaker.Faker;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,12 +30,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.jdbc.datasource.init.DataSourceInitializer;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -45,7 +40,6 @@ import org.springframework.web.context.WebApplicationContext;
 import javax.sql.DataSource;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.stream.IntStream;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
@@ -332,7 +326,7 @@ public class TaskControllerTest {
     @Nested
     class TestFilter {
 
-        void setUp(){
+        void setUp() {
             taskRepository.deleteAll();
             System.out.println("----INSERT TEST DATA VIA SQL SCRIPT FILE--------");
             ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
@@ -342,10 +336,11 @@ public class TaskControllerTest {
             populator.execute(dataSource); // run code that uses the test schema and data
 
         }
+
         @ParameterizedTest
         @ValueSource(strings = {"?titleCont=urgent&assigneeId=34&status=try&labelId=12"})
         @DisplayName("Test Filter tasks index")
-         //generating test data for all kind of filters checking
+        //generating test data for all kind of filters checking
         public void testFilter(String filterStringRequest) throws Exception {
             setUp(); //use
             //System.out.println("TASK in REPO-----------------");

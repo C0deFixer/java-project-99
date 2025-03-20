@@ -53,7 +53,7 @@ public class UserControllerTest {
     private MockMvc mockMvc;
 
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
 
     @Autowired
@@ -75,7 +75,6 @@ public class UserControllerTest {
     private JwtDecoder jwtDecoder;
 
     private SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor token;
-    private User user1, user2;
 
     public User createUser() {
         User testUser = Instancio.of(modelGenerator.getUserModel()).create();
@@ -93,7 +92,6 @@ public class UserControllerTest {
                 .apply(springSecurity()) //attach SecurityContext to MockMvc
                 .build();
 
-        //this.user1 = createUser();
     }
 
     @Test
@@ -144,7 +142,8 @@ public class UserControllerTest {
 
         User actualUserRepo = Optional.ofNullable(userRepository.findByEmail(userDto.getEmail()))
                 .orElseThrow(() -> new ResourceNotFoundException("Test User not foud by e-mail " + userDto.getEmail()));
-        //assertThat(actualUserRepo.getPassword()).isEqualTo(passwordEncoder.encode(userDto.getPassword())); //TODO fix bug encode return inconsistent hash every time
+        //TODO fix bug encode return inconsistent hash every time
+        //assertThat(actualUserRepo.getPassword()).isEqualTo(passwordEncoder.encode(userDto.getPassword()));
         assertThatJson(body).and(v -> v.node("id").isEqualTo(actualUserRepo.getId()),
                 v -> v.node("email").isEqualTo(userDto.getEmail()),
                 v -> v.node("firstName").isEqualTo(userDto.getFirstName()),
@@ -204,7 +203,6 @@ public class UserControllerTest {
         var result = mockMvc.perform(request).andExpect(status().isOk()).andReturn();
         String body = result.getResponse().getContentAsString();
         assertThat(jwtDecoder.decode(body).getClaims().get("sub")).isEqualTo(testUser.getEmail());
-        //assertThat(body).asBase64Decoded().toString();
 
     }
 

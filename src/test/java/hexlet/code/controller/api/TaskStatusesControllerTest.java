@@ -30,7 +30,6 @@ import java.util.List;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oidcLogin;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -130,7 +129,8 @@ class TaskStatusesControllerTest {
         });
 
         TaskStatus taskStatus = taskStatusRepository.findById(taskStatusDto.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Task status not found by id " + taskStatusDto.getId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Task status not found by id "
+                        + taskStatusDto.getId()));
         assertThatJson(body).and(v -> v.node("slug").isEqualTo(taskStatusTest.getSlug()),
                 v -> v.node("name").isEqualTo(taskStatusTest.getName()));
 

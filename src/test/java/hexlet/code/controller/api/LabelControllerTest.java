@@ -2,7 +2,6 @@ package hexlet.code.controller.api;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import hexlet.code.dto.LabelCreateDto;
 import hexlet.code.dto.LabelDto;
 import hexlet.code.exception.ResourceNotFoundException;
 import hexlet.code.mapper.LabelMapper;
@@ -120,7 +119,8 @@ public class LabelControllerTest {
         var responce = mockMvc.perform(request).andExpect(status().isCreated()).andReturn();
         String body = responce.getResponse().getContentAsString();
         Label labelActual = labelRepository.findByName(testLabel1.getName())
-                .orElseThrow(() -> new ResourceNotFoundException("Label with name" + testLabel1.getName() + " not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Label with name"
+                        + testLabel1.getName() + " not found"));
         assertThatJson(body).and(v -> v.node("id").isEqualTo(labelActual.getId()),
                 v -> v.node("name").isEqualTo(testLabel1.getName()));
 

@@ -44,7 +44,8 @@ public class ModelGenerator {
                 .ignore(Select.field(User::getUpdatedAt))
                 .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
                 //.supply(Select.field(User::getPassword), () -> faker.internet().password())
-                .supply(Select.field(User::getPasswordDigest), () -> passwordEncoder.encode(faker.internet().password()))
+                .supply(Select.field(User::getPasswordDigest),
+                        () -> passwordEncoder.encode(faker.internet().password()))
                 .toModel();
 
         userCreateDtoModel = Instancio.of(UserCreateDto.class)
