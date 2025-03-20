@@ -1,18 +1,36 @@
-.DEFAULT_GOAL := build-run
+setup:
+	npm install
+	./gradlew wrapper --gradle-version 8.7
+	./gradlew build
 
-run-dist:
-	make -C app run-dist
+backend:
+	./gradlew bootRun --args='--spring.profiles.active=dev'
+
+clean:
+	./gradlew clean
+
 build:
-	make -C app build
-run:
-	make -C app run
+	./gradlew clean build
+
+reload-classes:
+	./gradlew -t classes
+
+start-prod:
+	./gradlew bootRun --args='--spring.profiles.active=prod'
+
+install:
+	./gradlew installDist
+
 lint:
-	make -C app lint
+	./gradlew checkstyleMain checkstyleTest
+
 test:
-	make -C app test
+	./gradlew test
 
-report:
-	make -C app report
+# report:
+# 	./gradlew jacocoTestReport
 
-build-run:
-	build run
+check-java-deps:
+	./gradlew dependencyUpdates -Drevision=release
+
+
