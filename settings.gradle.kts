@@ -1,2 +1,2 @@
-rootProject.name = "Task manager"
+rootProject.name = "Task_manager"
 
