@@ -61,7 +61,7 @@ public class TaskController {
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("X-Total-Count", String.valueOf(taskList.size()))
-                .body(result.getContent());
+                .body(taskList);
     }
 
     @GetMapping("/{id}")
