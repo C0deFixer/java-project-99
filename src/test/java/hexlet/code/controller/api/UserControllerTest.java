@@ -207,8 +207,8 @@ public class UserControllerTest {
     }
 
     @Test
-    @DisplayName("Test fail login")
-    public void tesLoginFail() throws Exception {
+    @DisplayName("Test decline login")
+    public void tesLoginDecline() throws Exception {
         var request = get("/api/users"); //jwt missed
         var result = mockMvc.perform(request).andExpect(status().isUnauthorized()).andReturn();
     }

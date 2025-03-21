@@ -305,15 +305,15 @@ public class TaskControllerTest {
         }
 
         @Test
-        @DisplayName("Test Fail access without token")
-        public void testfailAccess() throws Exception {
+        @DisplayName("Test decline access without token")
+        public void testDeclineAccess() throws Exception {
             var request = delete("/api/tasks/"); //No token apply
             var result = mvc.perform(request).andExpect(status().isUnauthorized()).andReturn();
         }
 
         @Test
-        @DisplayName("Test Fail delete user linked with Task")
-        public void testfailDeleteUser() throws Exception {
+        @DisplayName("Test decline delete user linked with Task")
+        public void testDeclineDeleteUser() throws Exception {
             Task testTask = createTask();
             var request = delete("/api/users/" + testUser.getId())
                     .with(jwt());

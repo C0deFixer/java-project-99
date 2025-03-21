@@ -155,8 +155,8 @@ public class LabelControllerTest {
 
 
     @Test
-    @DisplayName("Test Fail Label repetable name creating")
-    public void testFailNameRepeate() throws Exception {
+    @DisplayName("Test decline Label repetable name creating")
+    public void testDeclineNameRepeate() throws Exception {
         LabelDto dto = mapper.map(testLabel);
         labelRepository.save(testLabel);
         var request = post("/api/labels")
