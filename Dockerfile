@@ -20,4 +20,4 @@ EXPOSE 8080/tcp
 
 #CMD /bin/bash
 #CMD ./build/install/app/bin/app
-CMD java -jar --args='--spring.profiles.active=prod' build/libs/app-0.0.1-SNAPSHOT.jar
+CMD java -jar build/libs/app-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
