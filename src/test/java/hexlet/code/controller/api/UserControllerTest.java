@@ -170,7 +170,7 @@ public class UserControllerTest {
         User actualUserRepo = userRepository.findById(user1.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Test User not foud by id " + user1.getId()));
         assertThatJson(body).and(v -> v.node("id").isEqualTo(user1.getId()),
-                v -> v.node("email").isEqualTo(user1.getEmail()),
+                v -> v.node("email").isEqualTo(testUser.getEmail()),
                 v -> v.node("firstName").isEqualTo(testUser.getFirstName()),
                 v -> v.node("lastName").isEqualTo(testUser.getLastName())
 
