@@ -122,7 +122,8 @@ public class LabelControllerTest {
                 .orElseThrow(() -> new ResourceNotFoundException("Label with name"
                         + testLabel1.getName() + " not found"));
         assertThatJson(body).and(v -> v.node("id").isEqualTo(labelActual.getId()),
-                v -> v.node("name").isEqualTo(testLabel1.getName()));
+                v -> v.node("name").isEqualTo(testLabel1.getName()),
+                v -> v.node("createdAt").isPresent());
 
     }
 
