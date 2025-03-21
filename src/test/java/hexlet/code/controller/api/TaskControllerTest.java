@@ -166,8 +166,12 @@ public class TaskControllerTest {
             var request = get("/api/tasks")
                     .with(token);
 
-            var responce = mvc.perform(request).andExpect(status().isOk()).andReturn();
-            String body = responce.getResponse().getContentAsString();
+            var responce = mvc.perform(request)
+                    .andExpect(status().isOk())
+                    .andReturn()
+                    .getResponse();
+            assertThat(responce.getHeader("X-Total-Count")).isEqualTo(String.valueOf(taskList.size()));
+            String body = responce.getContentAsString();
             assertThatJson(body).isArray();
             List<TaskDto> dtoList = om.readValue(body, new TypeReference<List<TaskDto>>() {
             });
@@ -194,8 +198,8 @@ public class TaskControllerTest {
 
             var request = get("/api/tasks/" + testTask.getId())
                     .with(token);
-            var responce = mvc.perform(request).andExpect(status().isOk()).andReturn();
-            String body = responce.getResponse().getContentAsString();
+            var responce = mvc.perform(request).andExpect(status().isOk()).andReturn().getResponse();
+            String body = responce.getContentAsString();
             assertThatJson(body).and(v -> v.node("index").isEqualTo(testTask.getIndex()),
                             v -> v.node("id").isEqualTo(testTask.getId()),
                             v -> v.node("title").isEqualTo(testTask.getName()),

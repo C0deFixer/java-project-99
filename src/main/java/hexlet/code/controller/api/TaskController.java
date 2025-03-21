@@ -60,7 +60,7 @@ public class TaskController {
         List<TaskDto> taskList = result.getContent();
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("X-Total-Count ", String.valueOf(taskList.size()))
+                .header("X-Total-Count", String.valueOf(taskList.size()))
                 .body(result.getContent());
     }
 
