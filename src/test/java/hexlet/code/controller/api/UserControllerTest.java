@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import hexlet.code.dto.AuthRequest;
 import hexlet.code.dto.UserCreateDto;
 import hexlet.code.dto.UserDto;
-import hexlet.code.exception.ResourceNotFoundException;
 import hexlet.code.mapper.UserMapper;
 import hexlet.code.model.User;
 import hexlet.code.repository.UserRepository;
@@ -33,6 +32,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -140,8 +140,8 @@ public class UserControllerTest {
         String body = mvcResult.getResponse().getContentAsString();
 
 
-        User actualUserRepo = Optional.ofNullable(userRepository.findByEmail(userDto.getEmail()))
-                .orElseThrow(() -> new ResourceNotFoundException("Test User not foud by e-mail " + userDto.getEmail()));
+        User actualUserRepo = Optional.ofNullable(userRepository.findByEmail(userDto.getEmail())).orElse(null);
+        assertNotNull(actualUserRepo);
         //TODO fix bug encode return inconsistent hash every time
         //assertThat(actualUserRepo.getPassword()).isEqualTo(passwordEncoder.encode(userDto.getPassword()));
         assertThatJson(body).and(v -> v.node("id").isEqualTo(actualUserRepo.getId()),
@@ -167,8 +167,8 @@ public class UserControllerTest {
         String body = mvcResult.getResponse().getContentAsString();
 
 
-        User actualUserRepo = userRepository.findById(user1.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Test User not foud by id " + user1.getId()));
+        User actualUserRepo = userRepository.findById(user1.getId()).orElse(null);
+        assertNotNull(actualUserRepo);
         assertThatJson(body).and(v -> v.node("id").isEqualTo(user1.getId()),
                 v -> v.node("email").isEqualTo(testUser.getEmail()),
                 v -> v.node("firstName").isEqualTo(testUser.getFirstName()),

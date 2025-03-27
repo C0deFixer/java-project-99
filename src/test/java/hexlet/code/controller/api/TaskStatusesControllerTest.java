@@ -3,7 +3,6 @@ package hexlet.code.controller.api;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hexlet.code.dto.TaskStatusDto;
-import hexlet.code.exception.ResourceNotFoundException;
 import hexlet.code.mapper.TaskStatusMapper;
 import hexlet.code.model.TaskStatus;
 import hexlet.code.repository.TaskRepository;
@@ -29,6 +28,7 @@ import java.util.List;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -128,9 +128,8 @@ class TaskStatusesControllerTest {
         TaskStatusDto taskStatusDto = om.readValue(body, new TypeReference<TaskStatusDto>() {
         });
 
-        TaskStatus taskStatus = taskStatusRepository.findById(taskStatusDto.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Task status not found by id "
-                        + taskStatusDto.getId()));
+        TaskStatus taskStatus = taskStatusRepository.findById(taskStatusDto.getId()).orElse(null);
+        assertNotNull(taskStatus);
         assertThatJson(body).and(v -> v.node("slug").isEqualTo(taskStatusTest.getSlug()),
                 v -> v.node("name").isEqualTo(taskStatusTest.getName()));
 

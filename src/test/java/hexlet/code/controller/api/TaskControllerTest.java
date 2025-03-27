@@ -19,6 +19,9 @@ import hexlet.code.util.TaskTestDto;
 import hexlet.code.util.TaskTestMapper;
 import net.datafaker.Faker;
 import org.instancio.Instancio;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -280,7 +283,12 @@ public class TaskControllerTest {
 
         var responce = mvc.perform(request).andExpect(status().isCreated()).andReturn();
         String body = responce.getResponse().getContentAsString();
-        assertThatJson(body).and(v -> v.node("index").isEqualTo(testTask.getIndex()),
+        TaskDto taskDto = om.readValue(body, new TypeReference<TaskDto>() {
+        });
+        Task taskRepo = taskRepository.findById(taskDto.getId()).orElse(null);
+        assertNotNull(taskRepo);
+        assertThatJson(body).and(v -> v.node("id").isEqualTo(taskRepo.getId()),
+                        v -> v.node("index").isEqualTo(testTask.getIndex()),
                         v -> v.node("title").isEqualTo(testTask.getName()),
                         v -> v.node("content").isEqualTo(testTask.getDescription()),
                         v -> v.node("taskLabelIds").isArray().containsExactlyInAnyOrderElementsOf(testLabelsId),

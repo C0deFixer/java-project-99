@@ -3,7 +3,6 @@ package hexlet.code.controller.api;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hexlet.code.dto.LabelDto;
-import hexlet.code.exception.ResourceNotFoundException;
 import hexlet.code.mapper.LabelMapper;
 import hexlet.code.model.Label;
 import hexlet.code.repository.LabelRepository;
@@ -27,6 +26,7 @@ import java.util.List;
 
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -118,9 +118,8 @@ public class LabelControllerTest {
 
         var responce = mockMvc.perform(request).andExpect(status().isCreated()).andReturn();
         String body = responce.getResponse().getContentAsString();
-        Label labelActual = labelRepository.findByName(testLabel1.getName())
-                .orElseThrow(() -> new ResourceNotFoundException("Label with name"
-                        + testLabel1.getName() + " not found"));
+        Label labelActual = labelRepository.findByName(testLabel1.getName()).orElse(null);
+        assertNotNull(labelActual);
         assertThatJson(body).and(v -> v.node("id").isEqualTo(labelActual.getId()),
                 v -> v.node("name").isEqualTo(testLabel1.getName()),
                 v -> v.node("createdAt").isPresent());
@@ -140,8 +139,8 @@ public class LabelControllerTest {
         String body = responce.getResponse().getContentAsString();
         assertThatJson(body).and(v -> v.node("id").isEqualTo(testLabel.getId()),
                 v -> v.node("name").isEqualTo(testLabel1.getName()));
-        Label labelActual = labelRepository.findById(testLabel.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Label with id" + testLabel.getId() + " not found"));
+        Label labelActual = labelRepository.findById(testLabel.getId()).orElse(null);
+        assertNotNull(labelActual);
         assertThat(labelActual.getName()).isEqualTo(testLabel1.getName());
     }
 
