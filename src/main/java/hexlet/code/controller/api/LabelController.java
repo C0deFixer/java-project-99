@@ -1,13 +1,8 @@
 package hexlet.code.controller.api;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import hexlet.code.dto.LabelCreateDto;
 import hexlet.code.dto.LabelDto;
 import hexlet.code.dto.LabelUpdateDto;
-import hexlet.code.exception.ResourceNotFoundException;
-import hexlet.code.mapper.LabelMapper;
-import hexlet.code.model.Label;
-import hexlet.code.repository.LabelRepository;
 import hexlet.code.service.LabelService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
