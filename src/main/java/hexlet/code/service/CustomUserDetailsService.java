@@ -49,7 +49,6 @@ public class CustomUserDetailsService implements UserDetailsManager {
     @Override
     public void createUser(UserDetails details) {
         User user = new User();
-        user.setFirstName("Unnamed"); //empty first name
         user.setEmail(details.getUsername());
         var hashedPassword = passwordEncoder.encode(details.getPassword());
         user.setPasswordDigest(hashedPassword);
@@ -107,10 +106,10 @@ public class CustomUserDetailsService implements UserDetailsManager {
         return false;
     }
 
-    public List<UserDto> getAll(){
+    public List<UserDto> getAll() {
         return userRepository.findAll()
-                    .stream().map(mapper::map)
-                    .toList();
+                .stream().map(mapper::map)
+                .toList();
     }
 
     public User getUserById(long id) {
