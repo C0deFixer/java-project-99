@@ -48,6 +48,7 @@ import java.util.stream.IntStream;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -328,7 +329,7 @@ public class TaskControllerTest {
         public void testDeclineDeleteUser() throws Exception {
             Task testTask = createTask();
             var request = delete("/api/users/" + testUser.getId())
-                    .with(jwt());
+                    .with(user(testUser));
             var result = mvc.perform(request).andExpect(status().isBadRequest()).andReturn(); //Cascade
             //var result = mvc.perform(request).andReturn();
             assertThat(userRepository.findById(testUser.getId())).isPresent();
@@ -356,7 +357,7 @@ public class TaskControllerTest {
         public void testFilter(String filterStringRequest) throws Exception {
             setUp(); //use
             //System.out.println("TASK in REPO-----------------");
-            System.out.println(taskRepository.findAll());
+            //System.out.println(taskRepository.findAll());
             var request = get("/api/tasks" + filterStringRequest)
                     .with(token);
             var responce = mvc.perform(request).andExpect(status().isOk())

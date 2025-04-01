@@ -34,7 +34,7 @@ public class TaskService {
         Page<Task> tasks = repository.findAll(spec, PageRequest.of(page - 1, OFF_SET));
         var result = tasks.map(mapper::map);
         List<TaskDto> taskList = result.getContent();
-        return repository.findAll().stream().map(mapper::map).toList();
+        return taskList;
     }
 
     public TaskDto show(Long id) {
