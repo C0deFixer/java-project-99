@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -154,7 +153,6 @@ class TaskStatusesControllerTest {
     }
 
     @Test
-    @PreAuthorize("hasRole('ADMIN')")
     void testDelete() throws Exception {
         TaskStatus taskStatusTest = createTaskStatus();
         var request = delete("/api/task_statuses/" + taskStatusTest.getId())
@@ -169,8 +167,6 @@ class TaskStatusesControllerTest {
     void tesDeclineUnAuthorizedAccess() throws Exception {
         TaskStatus taskStatusTest = createTaskStatus();
         var request = delete("/api/task_statuses/" + taskStatusTest.getId());
-        //.with(jwt())
-        //.contentType(MediaType.APPLICATION_JSON);
         var result = mockMvc.perform(request).andExpect(status().isUnauthorized()).andReturn();
     }
 }
