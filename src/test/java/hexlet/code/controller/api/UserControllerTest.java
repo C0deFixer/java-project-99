@@ -159,7 +159,7 @@ public class UserControllerTest {
         User user1 = createUser();
         User testUser = Instancio.of(modelGenerator.getUserModel()).create();
         UserDto userDto = mapper.map(testUser);
-        var request = put("/api/users/" + user1.getId()).with(jwt())
+        var request = put("/api/users/" + user1.getId()).with(user(user1))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(om.writeValueAsString(userDto));
         MvcResult mvcResult = mockMvc.perform(request)
@@ -183,7 +183,7 @@ public class UserControllerTest {
     public void testDelete() throws Exception {
         User testUser = createUser();
         userRepository.save(testUser);
-        var request = delete("/api/users/" + testUser.getId()).with(jwt());
+        var request = delete("/api/users/" + testUser.getId()).with(user(testUser));
         MvcResult mvcResult = mockMvc.perform(request)
                 .andExpect(status().isNoContent())
                 .andReturn();

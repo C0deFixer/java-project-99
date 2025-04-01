@@ -3,9 +3,7 @@ package hexlet.code.controller.api;
 import hexlet.code.dto.UserCreateDto;
 import hexlet.code.dto.UserDto;
 import hexlet.code.dto.UserUpdateDto;
-import hexlet.code.exception.ResourceNotFoundException;
 import hexlet.code.mapper.UserMapper;
-import hexlet.code.model.User;
 import hexlet.code.repository.UserRepository;
 import hexlet.code.service.CustomUserDetailsService;
 import jakarta.validation.Valid;
@@ -36,11 +34,10 @@ public class UserController {
 
     @Autowired
     private UserMapper mapper;
-    @Autowired
-    private UserMapper userMapper;
+
 
     @Autowired
-    private CustomUserDetailsService customUserDetailsService;
+    private CustomUserDetailsService userService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -48,9 +45,7 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping()
     public ResponseEntity<List<UserDto>> index() {
-        var users = userRepository.findAll()
-                .stream().map(userMapper::map)
-                .toList();
+        List<UserDto> users = userService.getAll();
         return ResponseEntity.ok()
                 .header("X-Total-Count", String.valueOf(users.size()))
                 .body(users);
@@ -59,40 +54,26 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{id}")
     public UserDto show(@PathVariable long id) {
-        var user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User with id" + id + " not found!"));
-        return mapper.map(user);
+        return mapper.map(userService.getUserById(id));
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public UserDto create(@Valid @RequestBody UserCreateDto userCreateDto) {
-        User user = mapper.map(userCreateDto);
-        //Password Digest already mapped through encoder - but it's smell code
-        user = userRepository.save(user); //Constraint violation exception catch if e-mail exist already
-        UserDto userDto = mapper.map(user);
-        return userDto;
+        return userService.createUser(userCreateDto);
     }
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("#id == authentication.principal.id")
     public UserDto updateUser(@Valid @RequestBody UserUpdateDto userUpdateDto, @PathVariable Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User with id " + id + " not found!"));
-        mapper.update(userUpdateDto, user);
-        user = userRepository.save(user);
-        //customUserDetailsService.updateUser(user);
-        UserDto userDto = mapper.map(user);
-        return userDto;
+        return userService.updateUser(userUpdateDto, id);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("#id == authentication.principal.id")
     public void delete(@PathVariable Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User with id " + id + " not found!"));
-        userRepository.delete(user);
+        userService.deleteUser(id);
     }
 }
