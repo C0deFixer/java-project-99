@@ -73,9 +73,6 @@ public class TaskStatusesController {
     @PreAuthorize("isAuthenticated()")
     public TaskStatusDto create(@Valid @RequestBody TaskStatusCreateDto taskStatusCreateDto) {
         String slug = taskStatusCreateDto.getSlug();
-        if (taskStatusRepository.findBySlug(slug).isPresent()) {
-            throw new ResourceNotFoundException("Tsak status with slug " + slug + " already exist");
-        }
         TaskStatus taskStatus = taskStatusRepository.save(mapper.map(taskStatusCreateDto));
         return mapper.map(taskStatus);
     }
