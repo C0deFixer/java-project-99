@@ -31,13 +31,13 @@ public class LabelService {
         return mapper.map(label);
     }
 
-    public LabelDto create(LabelCreateDto dto){
+    public LabelDto create(LabelCreateDto dto) {
         Label label = mapper.map(dto);
         labelRepository.save(label);
         return mapper.map(label);
     }
 
-    public LabelDto update(LabelUpdateDto dto, Long id){
+    public LabelDto update(LabelUpdateDto dto, Long id) {
         Label label = labelRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Label with id " + id + " not found"));
         mapper.update(dto, label);
@@ -45,7 +45,7 @@ public class LabelService {
         return mapper.map(label);
     }
 
-    public void delete(Long id){
+    public void delete(Long id) {
         labelRepository.deleteById(id);
     }
 
