@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import java.nio.file.AccessDeniedException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -43,6 +44,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                         constraintViolation.getInvalidValue(), constraintViolation.getMessage()))
                 .collect(Collectors.toSet());
         return new ResponseEntity<>(messages, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<String> handle(AccessDeniedException exception) {
+        logger.info("AccessDeniedException happen");
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exception.getMessage());
     }
 
 }
