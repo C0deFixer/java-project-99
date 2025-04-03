@@ -59,14 +59,14 @@ public class UserController {
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("#id == authentication.principal.id")
+    @PreAuthorize("@customUserDetailsService.getUserById(#id).getEmail() == authentication.name")
     public UserDto updateUser(@Valid @RequestBody UserUpdateDto userUpdateDto, @PathVariable Long id) {
         return userService.updateUser(userUpdateDto, id);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("#id == authentication.principal.id")
+    @PreAuthorize("@customUserDetailsService.getUserById(#id).getEmail() == authentication.name")
     public void delete(@PathVariable Long id) {
         userService.deleteUser(id);
     }
