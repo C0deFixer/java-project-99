@@ -41,7 +41,7 @@ public class CustomUserDetailsService implements UserDetailsManager {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        var user = Optional.ofNullable(userRepository.findByEmail(email))
+        var user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         return (UserDetails) user;
     }
@@ -65,8 +65,7 @@ public class CustomUserDetailsService implements UserDetailsManager {
 
     @Override
     public void updateUser(UserDetails details) {
-        User user = Optional.ofNullable(
-                        userRepository.findByEmail(details.getUsername()))
+        User user = userRepository.findByEmail(details.getUsername())
                 .orElseThrow(() ->
                         new ResourceNotFoundException("User with name " + details.getUsername() + " not found!"));
         user.setEmail(details.getUsername());
