@@ -2,6 +2,7 @@ package hexlet.code.controller.api;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import hexlet.code.AppApplication;
 import hexlet.code.dto.AuthRequest;
 import hexlet.code.dto.UserCreateDto;
 import hexlet.code.dto.UserDto;
@@ -22,6 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -43,7 +45,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
+@ContextConfiguration(classes = AppApplication.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @ActiveProfiles("dev")
 public class UserControllerTest {
@@ -75,6 +78,8 @@ public class UserControllerTest {
     @Autowired
     private JwtDecoder jwtDecoder;
 
+    private User testUser;
+
     private SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor token;
 
     public User createUser() {
@@ -88,20 +93,24 @@ public class UserControllerTest {
 
         userRepository.deleteAll();
 
+        testUser = createUser();
+
         mockMvc = MockMvcBuilders.webAppContextSetup(wac)
                 .defaultResponseCharacterEncoding(StandardCharsets.UTF_8)
                 .apply(springSecurity()) //attach SecurityContext to MockMvc
                 .build();
+
+        token = jwt().jwt(builder -> builder.subject(testUser.getEmail()));
+
 
     }
 
     @Test
     public void testShow() throws Exception {
 
-        User testUser = createUser();
         //using  SecurityMockMvcRequestPostProcessors.user  for test with explicit UserDetails
         //var request = get("/api/users/" + testUser.getId()).with(user(testUser));
-        var request = get("/api/users/" + testUser.getId()).with(jwt());
+        var request = get("/api/users/" + testUser.getId()).with(token);
         var result = mockMvc.perform(request)
                 .andExpect(status().isOk())
                 .andReturn();
@@ -112,9 +121,8 @@ public class UserControllerTest {
     @Test
     public void testIndex() throws Exception {
         User user1 = createUser();
-        User user2 = createUser();
-        List<User> users = List.of(user1, user2);
-        var request = get("/api/users").with(jwt());
+        List<User> users = List.of(testUser, user1);
+        var request = get("/api/users").with(token);
         var result = mockMvc.perform(request)
                 .andExpect(status().isOk())
                 .andReturn();
@@ -130,9 +138,8 @@ public class UserControllerTest {
     @Test
     @DisplayName("Test create User")
     public void testCreate() throws Exception {
-        User user1 = createUser();
         UserCreateDto userDto = Instancio.of(modelGenerator.getUserCreateDtoModel()).create();
-        var request = post("/api/users").with(jwt())
+        var request = post("/api/users").with(token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(om.writeValueAsString(userDto));
         MvcResult mvcResult = mockMvc.perform(request)
@@ -141,7 +148,7 @@ public class UserControllerTest {
         String body = mvcResult.getResponse().getContentAsString();
 
 
-        User actualUserRepo = Optional.ofNullable(userRepository.findByEmail(userDto.getEmail())).orElse(null);
+        User actualUserRepo = userRepository.findByEmail(userDto.getEmail()).orElse(null);
         assertNotNull(actualUserRepo);
         //TODO fix bug encode return inconsistent hash every time
         //assertThat(actualUserRepo.getPassword()).isEqualTo(passwordEncoder.encode(userDto.getPassword()));
@@ -156,10 +163,9 @@ public class UserControllerTest {
     @Test
     @DisplayName("Test update User")
     public void testUpdate() throws Exception {
-        User user1 = createUser();
-        User testUser = Instancio.of(modelGenerator.getUserModel()).create();
-        UserDto userDto = mapper.map(testUser);
-        var request = put("/api/users/" + user1.getId()).with(user(user1))
+        User data = Instancio.of(modelGenerator.getUserModel()).create();
+        UserDto userDto = mapper.map(data);
+        var request = put("/api/users/" + testUser.getId()).with(token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(om.writeValueAsString(userDto));
         MvcResult mvcResult = mockMvc.perform(request)
@@ -168,12 +174,13 @@ public class UserControllerTest {
         String body = mvcResult.getResponse().getContentAsString();
 
 
-        User actualUserRepo = userRepository.findById(user1.getId()).orElse(null);
+        User actualUserRepo = userRepository.findById(testUser.getId()).orElse(null);
         assertNotNull(actualUserRepo);
-        assertThatJson(body).and(v -> v.node("id").isEqualTo(user1.getId()),
-                v -> v.node("email").isEqualTo(testUser.getEmail()),
-                v -> v.node("firstName").isEqualTo(testUser.getFirstName()),
-                v -> v.node("lastName").isEqualTo(testUser.getLastName())
+        assertThatJson(body).and(v -> v.node("id").isEqualTo(testUser.getId()),
+                v -> v.node("email").isEqualTo(data.getEmail()),
+                v -> v.node("firstName").isEqualTo(data.getFirstName()),
+                v -> v.node("lastName").isEqualTo(data.getLastName()),
+                v -> v.node("createdAt").isPresent()
 
         );
     }
@@ -181,9 +188,7 @@ public class UserControllerTest {
     @Test
     @DisplayName("Test delete User")
     public void testDelete() throws Exception {
-        User testUser = createUser();
-        userRepository.save(testUser);
-        var request = delete("/api/users/" + testUser.getId()).with(user(testUser));
+        var request = delete("/api/users/{id}", testUser.getId()).with(token);
         MvcResult mvcResult = mockMvc.perform(request)
                 .andExpect(status().isNoContent())
                 .andReturn();
@@ -194,7 +199,6 @@ public class UserControllerTest {
     @Test
     @DisplayName("Test login")
     public void testLogin() throws Exception {
-        User testUser = createUser();
         AuthRequest authRequest = new AuthRequest(testUser.getEmail(), faker.internet().password());
         testUser.setPasswordDigest(passwordEncoder.encode(authRequest.getPassword()));
         userRepository.save(testUser);
@@ -218,10 +222,9 @@ public class UserControllerTest {
     @DisplayName("Test decline update another user")
     public void tesUpadateDecline() throws Exception {
         User testUser1 = createUser();
-        User testUser2 = createUser();
         UserDto userDto1 = mapper.map(testUser1);
         testUser1.setEmail(faker.internet().emailAddress());
-        var request = put("/api/users/" + testUser1.getId()).with(user(testUser2))
+        var request = put("/api/users/" + testUser.getId()).with(user(testUser1))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(om.writeValueAsString(userDto1));
         var result = mockMvc.perform(request).andExpect(status().isForbidden()).andReturn();
@@ -230,9 +233,8 @@ public class UserControllerTest {
     @Test
     @DisplayName("Test decline delete another user")
     public void tesDeleteDecline() throws Exception {
-        User testUser1 = createUser();
         User testUser2 = createUser();
-        var request = delete("/api/users/" + testUser1.getId()).with(user(testUser2));
+        var request = delete("/api/users/" + testUser.getId()).with(user(testUser2));
         var result = mockMvc.perform(request).andExpect(status().isForbidden()).andReturn();
     }
 }
